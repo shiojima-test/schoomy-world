@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>スクーミーワールド v3.0</title>
+<title>スクーミーワールド v4.0</title>
 <style>
   html,body{margin:0;height:100%;overflow:hidden;background:#8ed1f5;
     font-family:Meiryo,"Hiragino Kaku Gothic ProN",sans-serif;touch-action:none}
@@ -31,7 +31,7 @@
 <body>
 <div id="app"></div>
 <canvas id="minimap" width="152" height="152"></canvas>
-<div id="ver">SchooMy World v3.0</div>
+<div id="ver">SchooMy World v4.0</div>
 <div id="joyBase" class="joy"></div>
 <div id="joyKnob" class="joy"></div>
 <div id="overlay">
@@ -52,30 +52,32 @@
 import * as THREE from 'three';
 
 /* ============================================================
-   SchooMy World v3.0 — 賑わい大増強版
-   ガーランド・フェストゥンライト・屋台テント・バルーン・花壇・
-   公園の池と遊具・駐車車両・気球・回るスポットライト・紙吹雪
+   SchooMy World v4.0 — RPGタウン（FF/DQ風）
+   石畳の街路に木組みの家135軒が密集／城壁と4つの門／
+   北の丘に城／教会・宿屋・風車・井戸・クエスト掲示板／
+   吊り看板・樽・木箱・荷車・横断バナー
+   ＋スクーミーの噴水プラザ・フードトラック・ワークスペース・
+     カフェテラス・イベントステージ・公園はそのまま
    ============================================================ */
 
-const C = {
-  sky:0x8ed1f5, pave:0xb9bdbf, grass:0x7ecb5a, grassD:0x69b54a,
+const C={
+  sky:0x8ed1f5, grass:0x7ecb5a,
   plaza:0xc9cccf, diamond:0xd6d9db, border:0x8e9496,
-  asphalt:0x565b5f, dash:0xf2f4f4, walk:0xc4c8ca,
   stone:0xcfd4d7, basin:0x1b5e66, water:0x3fe6de, jet:0x6ff0ea,
   topiary:0x46c25a, shrub:0x7fe08c,
   palmTrunk:0x9a7b4f, palmLeaf:0x2fae52, treeTrunk:0x7a5a38,
   truckRed:0xd8362f, white:0xf5f5f2, orange:0xe88a0a,
-  lamp:0x3c4448, glass:0x9ad2ea, teal:0x3aaba8, tealD:0x2a8a88,
-  wood:0x8a5a33, woodL:0xb07a45, pinkFence:0xf2a7c3, soil:0x6e4a2e,
-  stage:0x2d3439, screen:0xf2f2f2, yellow:0xf0c54a, pond:0x57c9e8
+  lamp:0x2b3136, glass:0x9ad2ea, teal:0x3aaba8, tealD:0x2a8a88,
+  wood:0x8a5a33, woodL:0xb07a45, woodD:0x5e3d22,
+  pinkFence:0xf2a7c3, soil:0x6e4a2e,
+  stage:0x2d3439, yellow:0xf0c54a, pond:0x57c9e8,
+  wallStone:0xb7b3a8, wallStoneD:0x9d998e
 };
 const TREE_GREENS=[0x3fae4f,0x55c25e,0x2f9a47,0x6fcf6a];
-const TOWER_PALETTE=[0xeef0f2,0xd9dde0,0xf2f3f4,0xcfd6da,0xe7e3d8,0xdfe3e6,0xe4e7ea];
-const SHOP_PALETTE=[0xf5d9a8,0xe8a87c,0xa8d8ea,0xead7c3,0xbfd8b8,0x9cc4d8];
-const AWNING_PALETTE=[0xd8362f,0x3aaba8,0xe88a0a,0x2e8ec4];
+const WALLS=[0xf7f3ea,0xf2e8d8,0xf0cfae,0xf2e2b0,0xcfe0ea,0xd8e8cf,0xeadfc8];
+const ROOFS=[0xc0573a,0xa84030,0x3a6ea8,0x4a7d4f,0x5a6470,0xb55a2a];
 const PEN_COLORS=[0xd8362f,0xf0c54a,0x3aaba8,0x2e8ec4,0xe88a0a,0xe586b4];
 const FLOWER_COLORS=[0xe04438,0xf0c54a,0xf28ab4,0xffffff,0x8a6fd0,0xe88a0a];
-const CAR_COLORS=[0x2e8ec4,0x7fe08c,0xf0c54a,0xf5f5f2,0x8a6fd0,0xe8862c,0x4fb6c9];
 
 /* ---------- renderer / scene ---------- */
 const app=document.getElementById('app');
@@ -88,9 +90,9 @@ app.appendChild(renderer.domElement);
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(C.sky);
-scene.fog=new THREE.Fog(C.sky,100,380);
+scene.fog=new THREE.Fog(C.sky,110,430);
 
-const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,700);
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,800);
 camera.rotation.order='YXZ';
 
 scene.add(new THREE.HemisphereLight(0xcdeaff,0x9cc28b,0.95));
@@ -98,9 +100,9 @@ const sun=new THREE.DirectionalLight(0xfff3df,1.25);
 sun.position.set(80,110,60);
 sun.castShadow=true;
 sun.shadow.mapSize.set(2048,2048);
-sun.shadow.camera.left=-140; sun.shadow.camera.right=140;
-sun.shadow.camera.top=140; sun.shadow.camera.bottom=-140;
-sun.shadow.camera.near=10; sun.shadow.camera.far=380;
+sun.shadow.camera.left=-145; sun.shadow.camera.right=145;
+sun.shadow.camera.top=145; sun.shadow.camera.bottom=-145;
+sun.shadow.camera.near=10; sun.shadow.camera.far=400;
 sun.shadow.bias=-0.0008; sun.shadow.radius=4;
 scene.add(sun);
 
@@ -112,7 +114,10 @@ const circleCol=(x,z,r)=>colliders.push({t:'c',x,z,r});
 const boxCol=(x0,x1,z0,z1)=>colliders.push({t:'b',x0,x1,z0,z1});
 const dummy=new THREE.Object3D();
 const rot2=(dx,dz,ry)=>[Math.cos(ry)*dx+Math.sin(ry)*dz,-Math.sin(ry)*dx+Math.cos(ry)*dz];
-
+function loc(cx,cz,f,lx,lz){
+  const s=Math.sin(f),c=Math.cos(f);
+  return [cx+c*lx+s*lz, cz-s*lx+c*lz];
+}
 function collector(){
   return {
     mats:[],cols:[],
@@ -139,6 +144,25 @@ function box(w,h,d,c,x,y,z,{ry=0,shadow=true,recv=true,parent=scene,mat=null}={}
 }
 
 /* ---------- テクスチャ工房 ---------- */
+function cobbleTex(palette,joint,size=256,cell=30){
+  const cv=document.createElement('canvas'); cv.width=cv.height=size;
+  const g=cv.getContext('2d');
+  g.fillStyle=joint; g.fillRect(0,0,size,size);
+  for(let y=0;y<size;y+=cell){
+    const off=(y/cell)%2?cell/2:0;
+    for(let x=-cell;x<size+cell;x+=cell){
+      g.fillStyle=palette[Math.floor(Math.random()*palette.length)];
+      const jx=x+off+2+Math.random()*2, jy=y+2+Math.random()*2;
+      const w=cell-5-Math.random()*3, h=cell-5-Math.random()*3;
+      g.beginPath();
+      if(g.roundRect) g.roundRect(jx,jy,w,h,7); else g.rect(jx,jy,w,h);
+      g.fill();
+    }
+  }
+  const t=new THREE.CanvasTexture(cv);
+  t.colorSpace=THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  return t;
+}
 function noiseTex(base,spots,size=256){
   const cv=document.createElement('canvas'); cv.width=cv.height=size;
   const g=cv.getContext('2d');
@@ -167,7 +191,7 @@ function tileTex(base,line,cell=64,size=256){
   t.colorSpace=THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping;
   return t;
 }
-function textTexture(text,{bg='#f5f5f2',fg='#d8362f',stripe=null,stripe2='#f5f5f2',font='bold 64px Meiryo, sans-serif'}={}){
+function textTexture(text,{bg='#f5f5f2',fg='#d8362f',stripe=null,font='bold 64px Meiryo, sans-serif'}={}){
   const cv=document.createElement('canvas'); cv.width=512; cv.height=256;
   const g=cv.getContext('2d');
   g.fillStyle=bg; g.fillRect(0,0,512,256);
@@ -187,17 +211,35 @@ function stripeTexture(c1,c2){
 function gradientTex(){
   const cv=document.createElement('canvas'); cv.width=256; cv.height=64;
   const g=cv.getContext('2d');
-  for(let x=0;x<256;x++){
-    g.fillStyle=`hsl(${x/256*360},78%,62%)`; g.fillRect(x,0,1,64);
-  }
+  for(let x=0;x<256;x++){ g.fillStyle=`hsl(${x/256*360},78%,62%)`; g.fillRect(x,0,1,64); }
   const t=new THREE.CanvasTexture(cv);
   t.colorSpace=THREE.SRGBColorSpace; t.wrapS=THREE.RepeatWrapping;
   return t;
 }
+// 吊り看板のアイコン（RPGの店っぽく）
+function iconTex(bg,draw){
+  const cv=document.createElement('canvas'); cv.width=cv.height=128;
+  const g=cv.getContext('2d');
+  g.fillStyle=bg; g.beginPath(); g.arc(64,64,60,0,Math.PI*2); g.fill();
+  g.strokeStyle='#5e3d22'; g.lineWidth=7;
+  g.beginPath(); g.arc(64,64,56,0,Math.PI*2); g.stroke();
+  g.fillStyle='#ffffff'; g.strokeStyle='#ffffff'; g.lineWidth=8; g.lineCap='round';
+  draw(g);
+  const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+const SIGN_TEX=[
+  iconTex('#b55a2a',g=>{ g.fillRect(42,46,34,38); g.beginPath(); g.arc(82,64,12,-1.3,1.3); g.stroke(); }),                 // マグ
+  iconTex('#c79a4a',g=>{ g.beginPath(); g.ellipse(64,66,30,18,0,0,Math.PI*2); g.fill(); }),                                // パン
+  iconTex('#4a7d9d',g=>{ g.fillRect(58,36,12,16); g.beginPath(); g.moveTo(48,86); g.lineTo(64,52); g.lineTo(80,86); g.closePath(); g.fill(); }), // ポーション
+  iconTex('#6a7176',g=>{ g.beginPath(); g.moveTo(64,32); g.lineTo(64,84); g.moveTo(50,72); g.lineTo(78,72); g.stroke(); }), // 剣
+  iconTex('#3a8aa8',g=>{ g.beginPath(); g.ellipse(60,64,24,12,0,0,Math.PI*2); g.fill(); g.beginPath(); g.moveTo(82,64); g.lineTo(96,52); g.lineTo(96,76); g.closePath(); g.fill(); }), // 魚
+  iconTex('#8a5a33',g=>{ g.fillRect(52,36,16,32); g.fillRect(52,62,32,20); })                                              // ブーツ
+];
+const cobbleRoad=cobbleTex(['#8e9398','#84898e','#989da2','#7c8186'],'#62666a');
+const cobbleWalk=cobbleTex(['#c4c8ca','#b9bdbf','#cdd1d3','#aeb3b6'],'#979ca0');
 const grassTex=noiseTex('#7ecb5a',[['#69b54a',500,1,3],['#8fd96a',260,1,2.4]]);
-const asphTex=noiseTex('#565b5f',[['#4c5155',420,1,3],['#646a6e',200,0.6,1.6]]);
 const paveTex=tileTex('#c9cccf','#b4b8ba',64);
-const walkTex=tileTex('#c4c8ca','#aeb2b4',42);
+const dirtTex=noiseTex('#d8cdb4',[['#c9bda0',260,1,3]]);
 const gradTex=gradientTex();
 
 function patch(w,d,x,z,tex,y=0.015,texScale=4){
@@ -208,181 +250,321 @@ function patch(w,d,x,z,tex,y=0.015,texScale=4){
 }
 
 /* ============================================================
-   地面
+   地面と道路（すべて石畳のRPGタウン）
    ============================================================ */
 {
-  const t=paveTex.clone(); t.needsUpdate=true; t.repeat.set(200,200);
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(800,800),
+  const t=cobbleWalk.clone(); t.needsUpdate=true; t.repeat.set(180,180);
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(900,900),
     new THREE.MeshLambertMaterial({map:t}));
   ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
 }
-patch(125,125,-75,75,grassTex,0.015,5);     // 南西＝公園
-patch(120,110,-72,-70,grassTex,0.015,5);    // 北西＝カフェの芝生
-patch(44,30,-58,-42,walkTex,0.03,3);        // カフェのテラス舗装
-patch(70,16,-48,16,grassTex,0.03,5);        // 西＝フードトラック帯（芝）
-patch(40,26,8,32,walkTex,0.03,3);           // 南＝屋台まわり
-patch(64,52,52,80,walkTex,0.03,3);          // 南東＝イベント前広場
+patch(125,125,-75,75,grassTex,0.015,5);
+patch(120,110,-72,-70,grassTex,0.015,5);
+patch(44,30,-58,-42,cobbleWalk,0.03,3);
+patch(70,16,-48,16,grassTex,0.03,5);
+patch(64,52,52,80,cobbleWalk,0.035,3);
+patch(220,170,0,-260,grassTex,0.012,6);   // 北門の外の草原
+patch(8,70,0,-170,dirtTex,0.025,3);       // 城への道
 
-/* ============================================================
-   道路・歩道・縁石・白線・マンホール・街灯・信号・小物
-   ============================================================ */
-{
-  const t=asphTex.clone(); t.needsUpdate=true; t.repeat.set(2.5,60);
+{ // 街路（石畳・少し濃い）
+  const t=cobbleRoad.clone(); t.needsUpdate=true; t.repeat.set(3,86);
   const mat=new THREE.MeshLambertMaterial({map:t});
-  const rA=new THREE.Mesh(new THREE.BoxGeometry(10,0.04,300),mat);
-  rA.rotation.y=Math.PI/2; rA.position.y=0.02; rA.receiveShadow=true; scene.add(rA);
-  const rB=new THREE.Mesh(new THREE.BoxGeometry(10,0.04,300),mat);
-  rB.position.y=0.02; rB.receiveShadow=true; scene.add(rB);
+  const rA=new THREE.Mesh(new THREE.BoxGeometry(11,0.05,290),mat);
+  rA.rotation.y=Math.PI/2; rA.position.y=0.025; rA.receiveShadow=true; scene.add(rA);
+  const rB=new THREE.Mesh(new THREE.BoxGeometry(11,0.05,290),mat);
+  rB.position.y=0.025; rB.receiveShadow=true; scene.add(rB);
+  const rN=new THREE.Mesh(new THREE.BoxGeometry(11,0.05,76),mat.clone());
+  rN.position.set(0,0.02,-172); rN.receiveShadow=true; scene.add(rN);
 }
-const dashC=collector();
-for(let x=-148;x<150;x+=5){ if(Math.abs(x)>8) dashC.add(x,0.05,0,Math.PI/2); }
-for(let z=-148;z<150;z+=5){ if(Math.abs(z)>8) dashC.add(0,0.05,z,0); }
-dashC.build(new THREE.BoxGeometry(0.28,0.02,2.2),lam(C.dash));
 
-// 路側の白線
-const edgeC=collector();
-[[-4.7],[4.7]].forEach(([o])=>{
-  edgeC.add(72.5,0.045,o,Math.PI/2,1,1,0.45); edgeC.add(-72.5,0.045,o,Math.PI/2,1,1,0.45);
-  edgeC.add(o,0.045,72.5,0,1,1,0.45); edgeC.add(o,0.045,-72.5,0,1,1,0.45);
-});
-edgeC.build(new THREE.BoxGeometry(0.14,0.02,290),lam(C.dash));
-
-// 横断歩道＋停止線
-const zebraC=collector();
-for(let i=0;i<6;i++){ zebraC.add(8.6+i*1.24,0.05,0); zebraC.add(-8.6-i*1.24,0.05,0); }
-zebraC.build(new THREE.BoxGeometry(0.62,0.02,9.4),lam(C.dash));
-const zebraC2=collector();
-for(let i=0;i<6;i++){ zebraC2.add(0,0.05,8.6+i*1.24); zebraC2.add(0,0.05,-8.6-i*1.24); }
-zebraC2.build(new THREE.BoxGeometry(9.4,0.02,0.62),lam(C.dash));
-const stopC=collector();
-stopC.add(16.6,0.05,2.5); stopC.add(-16.6,0.05,-2.5);
-stopC.build(new THREE.BoxGeometry(0.5,0.02,4.6),lam(C.dash));
-const stopC2=collector();
-stopC2.add(2.5,0.05,-16.6); stopC2.add(-2.5,0.05,16.6);
-stopC2.build(new THREE.BoxGeometry(4.6,0.02,0.5),lam(C.dash));
-
-// 歩道（タイル）＋縁石
-function sidewalkT(w,l,x,z){
-  const t=walkTex.clone(); t.needsUpdate=true; t.repeat.set(w/2.2,l/2.2);
-  const m=new THREE.Mesh(new THREE.BoxGeometry(w,0.08,l),
-    new THREE.MeshLambertMaterial({map:t}));
-  m.position.set(x,0.04,z); m.receiveShadow=true; scene.add(m);
-}
-sidewalkT(300,3,0,-6.5); sidewalkT(300,3,0,6.5);
-sidewalkT(3,300,-6.5,0); sidewalkT(3,300,6.5,0);
-const curbC=collector();
-[[78,-5.05,Math.PI/2],[78,5.05,Math.PI/2],[-78,-5.05,Math.PI/2],[-78,5.05,Math.PI/2]]
-.forEach(([x,z,ry])=>curbC.add(x,0.06,z,ry,1,1,0.45));
-[[-5.05,78,0],[5.05,78,0],[-5.05,-78,0],[5.05,-78,0]]
-.forEach(([x,z,ry])=>curbC.add(x,0.06,z,ry,1,1,0.45));
-curbC.build(new THREE.BoxGeometry(0.26,0.13,300),lam(0xa8adb0));
-
-// マンホール
-const manC=collector();
-[[14,2],[34,-2],[58,2.4],[-22,-2.4],[-46,2],[-86,-2],[2,-32],[-2,-58],[2,24],[-2,52],[2,86],[110,2],[-118,-2]]
-.forEach(p=>manC.add(p[0],0.045,p[1]));
-manC.build(new THREE.CylinderGeometry(0.5,0.5,0.02,14),lam(0x3c4044));
-
-// 街灯
+/* ---------- クラシックな街灯（ランタン） ---------- */
 const lampPos=[];
-for(let x=-140;x<150;x+=24){ if(Math.abs(x)>10){ lampPos.push([x,-7.6]); lampPos.push([x+12,7.6]); } }
-for(let z=-140;z<150;z+=24){ if(Math.abs(z)>10){ lampPos.push([-7.6,z]); lampPos.push([7.6,z+12]); } }
-const poleC=collector(),headC=collector(),basketC=collector();
+for(let x=-128;x<134;x+=22){ if(Math.abs(x)>10){ lampPos.push([x,-7.4]); lampPos.push([x+11,7.4]); } }
+for(let z=-128;z<134;z+=22){ if(Math.abs(z)>10){ lampPos.push([-7.4,z]); lampPos.push([7.4,z+11]); } }
+const lpPole=collector(),lpLant=collector(),lpCap=collector(),lpBask=collector();
 lampPos.forEach((p,i)=>{
-  poleC.add(p[0],2.3,p[1]); headC.add(p[0],4.75,p[1]);
-  if(i%2===0) basketC.add(p[0],3.4,p[1]);   // 花のハンギングバスケット
-  circleCol(p[0],p[1],0.32);
+  lpPole.add(p[0],1.9,p[1]); lpLant.add(p[0],3.85,p[1]); lpCap.add(p[0],4.18,p[1]);
+  if(i%2===0) lpBask.add(p[0],2.7,p[1]);
+  circleCol(p[0],p[1],0.3);
 });
-poleC.build(new THREE.CylinderGeometry(0.08,0.11,4.6,7),lam(C.lamp),{shadow:true});
-headC.build(new THREE.SphereGeometry(0.26,10,8),bas(0xfff0c0));
-basketC.build(new THREE.SphereGeometry(0.3,8,6),
-  new THREE.MeshLambertMaterial({color:0xe586b4}));
+lpPole.build(new THREE.CylinderGeometry(0.07,0.12,3.8,7),lam(C.lamp),{shadow:true});
+lpLant.build(new THREE.BoxGeometry(0.34,0.42,0.34),bas(0xffe9b0));
+lpCap.build(new THREE.ConeGeometry(0.32,0.3,4),lam(C.lamp));
+lpBask.build(new THREE.SphereGeometry(0.28,8,6),lam(0xe586b4));
 
-// 信号機
-[[7.4,-7.4,Math.PI*0.75],[-7.4,7.4,-Math.PI*0.25]].forEach(([x,z,ry])=>{
-  box(0.18,5.6,0.18,C.lamp,x,2.8,z);
-  const head=box(0.5,1.3,0.35,0x23282b,x,5.0,z,{ry});
-  [[0.38,0xe04438],[0,0xf0c54a],[-0.38,0x3fae4f]].forEach(([dy,c])=>{
-    const l=new THREE.Mesh(new THREE.SphereGeometry(0.12,8,8),bas(c));
-    l.position.set(0,dy,0.2); head.add(l);
-  });
-  circleCol(x,z,0.3);
-});
+/* ============================================================
+   木組みの家（RPGの民家・全パーツInstancedMesh）
+   ============================================================ */
+const hBody=collector(),hFound=collector(),hRoof=collector(),hChim=collector();
+const hWin=collector(),hBeamV=collector(),hBeamH=collector(),hDoor=collector(),hStep=collector();
+const flowerC=collector(), fboxC=collector();
+const signMeshes=[];
+const roofShape=new THREE.Shape();
+roofShape.moveTo(-0.5,0); roofShape.lineTo(0.5,0); roofShape.lineTo(0,1); roofShape.closePath();
+const roofGeo=new THREE.ExtrudeGeometry(roofShape,{depth:1,bevelEnabled:false});
+roofGeo.translate(0,0,-0.5); roofGeo.rotateY(Math.PI/2);
+let hIdx=0,signIdx=0;
+function house(cx,cz,fry,w,d,h,{sign=false}={}){
+  const wall=WALLS[hIdx%WALLS.length];
+  const roof=ROOFS[(hIdx*2+1)%ROOFS.length];
+  const timber=(hIdx%3)!==2;
+  hIdx++;
+  hFound.add(cx,0.3,cz,fry,w+0.25,0.6,d+0.25);
+  hBody.add(cx,h/2+0.5,cz,fry,w,h,d,wall);
+  hRoof.add(cx,h+0.48,cz,fry,w+0.7,1.0+(hIdx%4)*0.22,d+0.85,roof);
+  if(hIdx%2===0){
+    const [chx,chz]=loc(cx,cz,fry,w*0.26,0);
+    hChim.add(chx,h+1.5,chz,fry,1,0.9+(hIdx%3)*0.4,1);
+  }
+  // 正面：窓・木組み梁・ドア・フラワーボックス
+  const floors=Math.max(1,Math.floor((h-1.4)/2.2));
+  const cols=Math.max(1,Math.floor((w-1.4)/1.8));
+  for(let f=0;f<floors;f++){
+    for(let c2=0;c2<cols;c2++){
+      const u=(c2-(cols-1)/2)*1.8;
+      if(f===0 && Math.abs(u)<0.8) continue; // ドアの位置
+      const y=1.6+f*2.2;
+      const [wx,wz]=loc(cx,cz,fry,u,d/2+0.05);
+      hWin.add(wx,y,wz,fry);
+      if(f===0 && (hIdx+c2)%2===0){
+        const [bx,bz]=loc(cx,cz,fry,u,d/2+0.18);
+        fboxC.add(bx,y-0.75,bz,fry);
+        for(let k=0;k<3;k++){
+          const [fx2,fz2]=loc(cx,cz,fry,u-0.28+k*0.28,d/2+0.2);
+          flowerC.add(fx2,y-0.55,fz2,0,1,1,1,FLOWER_COLORS[(hIdx+k)%FLOWER_COLORS.length]);
+        }
+      }
+    }
+  }
+  if(timber){
+    [-(w/2-0.12),w/2-0.12].forEach(lx=>{
+      const [bx,bz]=loc(cx,cz,fry,lx,d/2+0.06);
+      hBeamV.add(bx,h/2+0.5,bz,fry,1,h*0.95,1);
+    });
+    [[h*0.5+0.5],[h+0.32]].forEach(([y])=>{
+      const [bx,bz]=loc(cx,cz,fry,0,d/2+0.06);
+      hBeamH.add(bx,y,bz,fry,w*0.97,1,1);
+    });
+  }
+  const [dx2,dz2]=loc(cx,cz,fry,0,d/2+0.07);
+  hDoor.add(dx2,1.5,dz2,fry);
+  const [sx2,sz2]=loc(cx,cz,fry,0,d/2+0.35);
+  hStep.add(sx2,0.12,sz2,fry);
+  if(sign){
+    const [px2,pz2]=loc(cx,cz,fry,Math.min(w/2-0.5,1.6),d/2+0.45);
+    const [ax2,az2]=loc(cx,cz,fry,Math.min(w/2-0.5,1.6),d/2+0.2);
+    box(0.08,0.08,0.8,C.woodD,(px2+ax2)/2,3.0,(pz2+az2)/2,{ry:fry,shadow:false});
+    const board=new THREE.Mesh(new THREE.PlaneGeometry(0.95,0.95),
+      new THREE.MeshLambertMaterial({map:SIGN_TEX[signIdx%SIGN_TEX.length],side:THREE.DoubleSide,transparent:true}));
+    const a=fry+Math.PI/2;
+    board.rotation.y=a; board.position.set(px2,2.45,pz2);
+    scene.add(board); signMeshes.push(board); signIdx++;
+  }
+  const s=Math.abs(Math.sin(fry))>0.5;
+  const ex=s?d/2:w/2, ez=s?w/2:d/2;
+  boxCol(cx-ex,cx+ex,cz-ez,cz+ez);
+}
+/* ---- 通り沿いの家並み（連続したファサード） ---- */
+function rowAlongX(zc,fry,x0,x1,skips){
+  let x=x0;
+  while(x<x1-5){
+    const w=6+(Math.floor(Math.random()*3))*1.4;
+    const d=6+Math.random()*2;
+    const h=3.2+Math.floor(Math.random()*3)*1.5;
+    const cxh=x+w/2;
+    if(!skips.some(([a,b])=>cxh+w/2>a&&cxh-w/2<b))
+      house(cxh,zc,fry,w,d,h,{sign:Math.random()<0.32});
+    x+=w+1.2;
+  }
+}
+function rowAlongZ(xc,fry,z0,z1,skips){
+  let z=z0;
+  while(z<z1-5){
+    const w=6+(Math.floor(Math.random()*3))*1.4;
+    const d=6+Math.random()*2;
+    const h=3.2+Math.floor(Math.random()*3)*1.5;
+    const czh=z+w/2;
+    if(!skips.some(([a,b])=>czh+w/2>a&&czh-w/2<b))
+      house(xc,czh,fry,w,d,h,{sign:Math.random()<0.32});
+    z+=w+1.2;
+  }
+}
+rowAlongX(-13.5,0,-130,130,[[-86,-36],[-40,-8],[-12,12]]);
+rowAlongX(13.5,Math.PI,-130,130,[[-74,-32],[-12,20],[18,62]]);
+rowAlongZ(-13.5,Math.PI/2,-130,-8,[[-34,-6]]);
+rowAlongZ(-13.5,Math.PI/2,62,130,[]);
+rowAlongZ(13.5,-Math.PI/2,-130,-8,[]);
+rowAlongZ(13.5,-Math.PI/2,12,130,[[22,38],[50,106]]);
+/* ---- 街区の内側を家で埋める ---- */
+const churchPos=[64,-44], innPos=[-66,-72];
+function farFrom(x,z,px,pz,r){ const dx=x-px,dz=z-pz; return dx*dx+dz*dz>r*r; }
+for(let gx=26;gx<=126;gx+=16){
+  for(let gz=-28;gz>=-112;gz-=16){
+    if(!farFrom(gx,gz,churchPos[0],churchPos[1],14)) continue;
+    if((gx+gz)%5===0) continue;
+    const fry=[0,Math.PI,Math.PI/2,-Math.PI/2][(gx*3+gz)&3];
+    house(gx+(gz%8?2:-2),gz,fry,6.5+(gx%3)*1.2,6.5,3.2+((gx+gz)%3)*1.5,{sign:false});
+  }
+}
+for(let gx=-100;gx>=-130;gx-=15){
+  for(let gz=-22;gz>=-122;gz-=16){
+    const fry=[Math.PI/2,-Math.PI/2,0][(gx-gz)%3<0?-((gx-gz)%3):((gx-gz)%3)];
+    house(gx,gz+(gx%6?2:-2),fry,6.5,6.5,3.2+((gx-gz)%3)*1.5);
+  }
+}
+for(let gx=-28;gx>=-92;gx-=16){
+  for(let gz=-94;gz>=-122;gz-=14){
+    if(!farFrom(gx,gz,innPos[0],innPos[1],16)) continue;
+    house(gx,gz,(gx&1)?0:Math.PI/2,6.5,6.5,3.2+((gx+gz)%2)*1.5);
+  }
+}
+for(let gx=70;gx<=122;gx+=17){
+  for(let gz=16;gz<=48;gz+=16){
+    house(gx,gz,-Math.PI/2,6.5+(gz%3),6.5,3.2+((gx+gz)%3)*1.5,{sign:(gx+gz)%4===0});
+  }
+}
+for(let gx=86;gx<=124;gx+=16){
+  for(let gz=64;gz<=126;gz+=16){
+    house(gx,gz,((gx+gz)&1)?Math.PI:Math.PI/2,6.5,6.5,3.2+((gx-gz)%3+3)%3*1.5);
+  }
+}
+for(let gx=30;gx<=64;gx+=16){
+  house(gx,120,0,7,6.5,4.7,{sign:gx===46});
+}
 
-// 消火栓・ゴミ箱
-[[12,8.2],[-12,-8.2],[8.2,40],[-8.2,-44]].forEach(([x,z])=>{
-  box(0.32,0.55,0.32,0xd8362f,x,0.3,z);
-  const t=new THREE.Mesh(new THREE.SphereGeometry(0.2,8,8),lam(0xd8362f));
-  t.position.set(x,0.66,z); t.castShadow=true; scene.add(t);
-  circleCol(x,z,0.3);
-});
-const binC=collector();
-[[18,8.2],[-26,8.2],[8.2,-22],[8.2,52],[-8.2,26],[60,8.2],[-70,-8.2],[8.2,70]]
-.forEach(p=>{ binC.add(p[0],0.42,p[1]); circleCol(p[0],p[1],0.3); });
-binC.build(new THREE.CylinderGeometry(0.32,0.28,0.84,10),lam(C.teal),{shadow:true});
-
-// バス停（カフェ前）
+/* ---- 宿屋（大型の木組み・カフェの母屋） ---- */
 {
-  const BX=-58,BZ=-7.6;
-  box(0.12,2.6,0.12,C.lamp,BX-2.4,1.3,BZ); box(0.12,2.6,0.12,C.lamp,BX+2.4,1.3,BZ);
-  const roof=new THREE.Mesh(new THREE.BoxGeometry(5.6,0.1,1.8),
-    new THREE.MeshLambertMaterial({color:0x9ad2ea,transparent:true,opacity:0.65}));
-  roof.position.set(BX,2.65,BZ); roof.castShadow=true; scene.add(roof);
-  box(2.6,0.45,0.5,C.wood,BX,0.45,BZ-0.4);
-  box(0.1,3.2,0.1,C.teal,BX+3.4,1.6,BZ);
-  const sign=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,0.08,16),lam(C.teal));
-  sign.rotation.x=Math.PI/2; sign.position.set(BX+3.4,3.0,BZ); scene.add(sign);
-  boxCol(BX-2.8,BX+2.8,BZ-0.9,BZ+0.4);
+  const IX=innPos[0],IZ=innPos[1];
+  house(IX,IZ,0,20,13,9.5,{sign:true});
+  // 張り出した2階・ドーマー
+  box(21,0.4,2.2,C.woodD,IX,5.1,IZ+7.2,{shadow:false});
+  [[-6],[0],[6]].forEach(([ox])=>{
+    box(2.2,2.2,1.6,0xf2e8d8,IX+ox,11.4,IZ+5.0);
+    const dr=new THREE.Mesh(roofGeo,lam(0xa84030));
+    dr.scale.set(2.8,1.2,2.2); dr.position.set(IX+ox,12.4,IZ+5.0); dr.castShadow=true; scene.add(dr);
+  });
+}
+/* ---- 教会（時計塔と尖塔） ---- */
+{
+  const X=churchPos[0],Z=churchPos[1];
+  box(11,8,15,0xe8e2d4,X,4,Z);
+  const r=new THREE.Mesh(roofGeo,lam(0x5a6470));
+  r.scale.set(12,3.4,16); r.position.set(X,8,Z); r.castShadow=true; scene.add(r);
+  box(4.6,17,4.6,0xdcd6c8,X,8.5,Z+9);
+  const sp=new THREE.Mesh(new THREE.ConeGeometry(3.4,7,4),lam(0xa84030));
+  sp.rotation.y=Math.PI/4; sp.position.set(X,20.8,Z+9); sp.castShadow=true; scene.add(sp);
+  const clock=new THREE.Mesh(new THREE.CircleGeometry(1.3,20),bas(0xfdf8ea));
+  clock.position.set(X,14.5,Z+11.32); scene.add(clock);
+  box(0.16,1.0,0.05,0x2d3439,X,14.7,Z+11.34,{shadow:false});
+  box(0.7,0.16,0.05,0x2d3439,X+0.2,14.5,Z+11.34,{shadow:false});
+  box(2.0,3.4,0.3,C.woodD,X,1.7,Z+7.6,{shadow:false});
+  boxCol(X-5.5,X+5.5,Z-7.5,Z+11.4);
+  const bell=new THREE.Mesh(new THREE.SphereGeometry(0.16,8,8),bas(0xf0c54a));
+  bell.position.set(X,24.6,Z+9); scene.add(bell);
 }
 
 /* ============================================================
-   ガーランド・フェストゥンライト・バルーン（賑わい装飾）
+   城壁・4つの門・北の丘の城
    ============================================================ */
-const penShape=new THREE.Shape();
-penShape.moveTo(-0.17,0); penShape.lineTo(0.17,0); penShape.lineTo(0,-0.44); penShape.closePath();
-const penGeo=new THREE.ShapeGeometry(penShape);
-const penC=collector(), bulbC=collector();
-const lineMat=new THREE.LineBasicMaterial({color:0x4a4f52});
-let penIdx=0;
-function garland(x1,y1,z1,x2,y2,z2,mode='pen',n=12){
-  const L=Math.hypot(x2-x1,z2-z1);
-  const sag=L*0.085;
-  const pts=[];
-  for(let i=0;i<=20;i++){
-    const u=i/20;
-    pts.push(new THREE.Vector3(
-      x1+(x2-x1)*u, y1+(y2-y1)*u - sag*4*u*(1-u), z1+(z2-z1)*u));
-  }
-  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lineMat));
-  const a=Math.atan2(-(z2-z1),(x2-x1));
+const merlonC=collector();
+function wallRun(x0,z0,x1,z1){
+  const L=Math.hypot(x1-x0,z1-z0);
+  const ry=Math.atan2(x1-x0,z1-z0);
+  const cx=(x0+x1)/2,cz=(z0+z1)/2;
+  const m=box(2.6,5.2,L,C.wallStone,cx,2.6,cz,{ry});
+  box(3.2,0.7,L,C.wallStoneD,cx,5.4,cz,{ry,shadow:false});
+  const n=Math.floor(L/2.4);
   for(let i=0;i<n;i++){
     const u=(i+0.5)/n;
-    const px=x1+(x2-x1)*u, pz=z1+(z2-z1)*u;
-    const py=y1+(y2-y1)*u - sag*4*u*(1-u);
-    if(mode==='pen') penC.add(px,py,pz,a,1,1,1,PEN_COLORS[(penIdx++)%PEN_COLORS.length]);
-    else bulbC.add(px,py-0.07,pz);
+    merlonC.add(x0+(x1-x0)*u,6.1,z0+(z1-z0)*u,ry);
+  }
+  const ex=Math.abs(Math.sin(ry))>0.5?L/2:1.3, ez=Math.abs(Math.sin(ry))>0.5?1.3:L/2;
+  boxCol(cx-ex,cx+ex,cz-ez,cz+ez);
+}
+function watchTower(x,z,r,h,roofC){
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(r,r*1.12,h,12),lam(C.wallStone));
+  t.position.set(x,h/2,z); t.castShadow=true; t.receiveShadow=true; scene.add(t);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(r*1.25,r*1.5,12),lam(roofC));
+  cone.position.set(x,h+r*0.72,z); cone.castShadow=true; scene.add(cone);
+  circleCol(x,z,r+0.3);
+  return h+r*1.4;
+}
+const B=134;
+wallRun(-B,-B,-7,-B); wallRun(7,-B,B,-B);
+wallRun(-B,B,-7,B);   wallRun(7,B,B,B);
+wallRun(-B,-B,-B,-7); wallRun(-B,7,-B,B);
+wallRun(B,-B,B,-7);   wallRun(B,7,B,B);
+watchTower(-B,-B,4,10,0xa84030); watchTower(B,-B,4,10,0xa84030);
+watchTower(-B,B,4,10,0xa84030);  watchTower(B,B,4,10,0xa84030);
+// 門（北は開門＝城への道／東西南は木の扉で閉門）
+const flags=[];
+function flag(x,z,h,color){
+  box(0.1,h,0.1,0xd9dcde,x,h/2,z);
+  const f=new THREE.Mesh(new THREE.PlaneGeometry(1.25,0.7),
+    new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide}));
+  f.position.set(x+0.63,h-0.45,z); scene.add(f); flags.push(f);
+  circleCol(x,z,0.25);
+}
+function gate(x,z,axis,open){
+  const o=axis==='x'?[1,0]:[0,1]; // 道の方向
+  const p=axis==='x'?[0,1]:[1,0]; // 門の並び方向
+  [-8.4,8.4].forEach(s=>{
+    const top=watchTower(x+p[0]*s,z+p[1]*s,2.6,8.5,0x3a6ea8);
+    flag(x+p[0]*s,z+p[1]*s,top+3.2,C.teal);
+  });
+  box(axis==='x'?2.8:14.4,2.2,axis==='x'?14.4:2.8,C.wallStone,x,6.4,z);
+  if(!open){
+    const d=box(axis==='x'?0.6:11.6,4.6,axis==='x'?11.6:0.6,C.woodD,x,2.3,z);
+    box(axis==='x'?0.7:11.8,0.4,axis==='x'?11.8:0.7,0x3c4448,x,3.4,z,{shadow:false});
+    if(axis==='x') boxCol(x-0.5,x+0.5,z-6,z+6);
+    else boxCol(x-6,x+6,z-0.5,z+0.5);
   }
 }
-function pole(x,z,h,c=C.wood){ box(0.12,h,0.12,c,x,h/2,z); circleCol(x,z,0.25); return h; }
+gate(0,-B,'z',true);   // 北門：開（城への道）
+gate(0,B,'z',false);
+gate(B,0,'x',false);
+gate(-B,0,'x',false);
 
-const balloonGroups=[];
-function balloons(x,z){
-  const g=new THREE.Group(); g.position.set(x,0,z);
-  box(0.5,0.5,0.5,0x9aa3a8,0,0.25,0,{parent:g});
-  for(let k=0;k<4;k++){
-    const a=k/4*Math.PI*2;
-    const bx=Math.cos(a)*0.45,bz=Math.sin(a)*0.45,by=3.1+(k%2)*0.5;
-    const b=new THREE.Mesh(new THREE.SphereGeometry(0.36,10,8),
-      lam(PEN_COLORS[(k+Math.floor(x))%PEN_COLORS.length & 5]));
-    b.position.set(bx,by,bz); b.scale.y=1.15; b.castShadow=true; g.add(b);
-    const pts=[new THREE.Vector3(0,0.5,0),new THREE.Vector3(bx,by-0.36,bz)];
-    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lineMat));
+/* ---- 北の丘の城 ---- */
+{
+  const CX=0,CZ=-205;
+  const mound=new THREE.Mesh(new THREE.ConeGeometry(46,20,24),lam(0x69b54a));
+  mound.position.set(CX,10,CZ); mound.receiveShadow=true; scene.add(mound);
+  const G=new THREE.Group(); G.position.set(CX,19.5,CZ); scene.add(G);
+  box(26,16,20,0xddd8cc,0,8,0,{parent:G});
+  box(28,2,22,C.wallStoneD,0,17,0,{parent:G,shadow:false});
+  [[-13,-10],[13,-10],[-13,10],[13,10]].forEach(([tx,tz])=>{
+    const t=new THREE.Mesh(new THREE.CylinderGeometry(3.6,4,24,12),lam(0xe4dfd2));
+    t.position.set(tx,12,tz); t.castShadow=true; G.add(t);
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(4.4,7,12),lam(0xd86a8a));
+    cone.position.set(tx,27.5,tz); cone.castShadow=true; G.add(cone);
+  });
+  const main=new THREE.Mesh(new THREE.CylinderGeometry(5,5.6,32,14),lam(0xe9e4d6));
+  main.position.set(0,16,0); main.castShadow=true; G.add(main);
+  const mcone=new THREE.Mesh(new THREE.ConeGeometry(6,9.5,14),lam(0xd86a8a));
+  mcone.position.set(0,36.5,0); mcone.castShadow=true; G.add(mcone);
+  box(5,7,1.5,0x5e3d22,0,3.5,10.4,{parent:G,shadow:false});
+  // 城の旗
+  const fp=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,4,5),lam(0xd9dcde));
+  fp.position.set(0,43,0); G.add(fp);
+  const cf=new THREE.Mesh(new THREE.PlaneGeometry(2.2,1.2),
+    new THREE.MeshLambertMaterial({color:C.teal,side:THREE.DoubleSide}));
+  cf.position.set(CX+1.1,19.5+44.2,CZ); scene.add(cf); flags.push(cf);
+  circleCol(CX,CZ,47);
+  // 道沿いの並木
+  for(let z=-146;z>-176;z-=9){
+    [-6.5,6.5].forEach(x=>{
+      const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.26,2.2,7),lam(C.treeTrunk));
+      tr.position.set(x,1.1,z); tr.castShadow=true; scene.add(tr);
+      const cn=new THREE.Mesh(new THREE.IcosahedronGeometry(1.7,1),lam(0x3fae4f));
+      cn.position.set(x,3.2,z); cn.castShadow=true; scene.add(cn);
+      circleCol(x,z,0.5);
+    });
   }
-  scene.add(g); balloonGroups.push(g); circleCol(x,z,0.45);
 }
 
 /* ============================================================
-   噴水プラザ
+   噴水プラザ（スクーミーの中心）
    ============================================================ */
 const PX=40,PZ=28;
 const plazaG=new THREE.Group(); plazaG.position.set(PX,0,PZ); scene.add(plazaG);
@@ -394,7 +576,6 @@ const plazaG=new THREE.Group(); plazaG.position.set(PX,0,PZ); scene.add(plazaG);
 }
 box(26.4,0.06,26.4,C.border,0,0.13,0,{parent:plazaG,ry:Math.PI/4,shadow:false});
 box(25.2,0.06,25.2,C.diamond,0,0.17,0,{parent:plazaG,ry:Math.PI/4,shadow:false});
-
 box(8,0.9,8,C.basin,0,0.45,0,{parent:plazaG});
 const waterSurf=new THREE.Mesh(new THREE.PlaneGeometry(7.3,7.3),
   new THREE.MeshBasicMaterial({color:C.water,transparent:true,opacity:0.95}));
@@ -404,8 +585,8 @@ waterSurf.rotation.x=-Math.PI/2; waterSurf.position.y=0.91; plazaG.add(waterSurf
   const c=new THREE.Mesh(new THREE.CylinderGeometry(t.r,t.r*1.06,t.h,20),lam(C.stone));
   c.position.y=t.y+t.h/2; c.castShadow=true; c.receiveShadow=true; plazaG.add(c);
 });
-const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.32,0.4,12),lam(C.stone));
-cap.position.y=4.18; cap.castShadow=true; plazaG.add(cap);
+const capM=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.32,0.4,12),lam(C.stone));
+capM.position.y=4.18; capM.castShadow=true; plazaG.add(capM);
 [{r:2.45,y:1.48},{r:1.78,y:2.33},{r:1.12,y:3.18}].forEach(o=>{
   const ring=new THREE.Mesh(new THREE.TorusGeometry(o.r,0.07,8,28),
     new THREE.MeshBasicMaterial({color:C.water,transparent:true,opacity:0.85}));
@@ -428,7 +609,6 @@ pGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array(P_N*3),3
 plazaG.add(new THREE.Points(pGeo,
   new THREE.PointsMaterial({color:0xc8fffb,size:0.16,transparent:true,opacity:0.95})));
 circleCol(PX,PZ,5.3);
-
 const tpT=collector(),tpB=collector(),tpP=collector();
 for(let k=0;k<8;k++){
   const a=(k+0.5)/8*Math.PI*2,x=Math.cos(a)*6.9,z=Math.sin(a)*6.9;
@@ -438,8 +618,7 @@ for(let k=0;k<8;k++){
 tpT.build(new THREE.CylinderGeometry(0.10,0.13,0.7,8),lam(C.palmTrunk),{parent:plazaG});
 tpB.build(new THREE.IcosahedronGeometry(0.85,1),lam(C.topiary),{shadow:true,parent:plazaG});
 tpP.build(new THREE.CylinderGeometry(0.32,0.38,0.35,10),lam(0xb9bdbf),{parent:plazaG});
-
-const shrubC=collector(), flowerC=collector();
+const shrubC=collector();
 [[13,13],[-13,13],[13,-13],[-13,-13]].forEach(([bx,bz])=>{
   box(5.4,0.34,5.4,C.border,bx,0.27,bz,{parent:plazaG});
   box(4.9,0.1,4.9,C.grass,bx,0.47,bz,{parent:plazaG,shadow:false});
@@ -448,33 +627,145 @@ const shrubC=collector(), flowerC=collector();
   });
   for(let f=0;f<8;f++){
     const a=f/8*Math.PI*2;
-    flowerC.add(PX+bx+Math.cos(a)*2.1, 0.62, PZ+bz+Math.sin(a)*2.1, 0,1,1,1,
+    flowerC.add(PX+bx+Math.cos(a)*2.1,0.62,PZ+bz+Math.sin(a)*2.1,0,1,1,1,
       FLOWER_COLORS[f%FLOWER_COLORS.length]);
   }
   boxCol(PX+bx-2.7,PX+bx+2.7,PZ+bz-2.7,PZ+bz+2.7);
 });
 shrubC.build(new THREE.IcosahedronGeometry(0.62,1),lam(C.shrub),{shadow:true,parent:plazaG});
-
-// プラザの旗（ひし形4頂点にスクーミーティールの旗＋ペナント・ガーランド）
-const flags=[];
-function flag(x,z,h,color){
-  box(0.1,h,0.1,0xd9dcde,x,h/2,z);
-  const f=new THREE.Mesh(new THREE.PlaneGeometry(1.25,0.7),
-    new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide}));
-  f.position.set(x+0.63,h-0.45,z); scene.add(f); flags.push(f);
-  circleCol(x,z,0.25);
-}
 flag(PX+19,PZ,5.4,C.teal); flag(PX-19,PZ,5.4,C.teal);
 flag(PX,PZ+19,5.4,C.teal); flag(PX,PZ-19,5.4,C.teal);
-flag(PX+9,PZ,4.2,0xd8362f);  // 噴水脇の赤い旗
-garland(PX+19,5.0,PZ, PX,5.0,PZ+19,'pen',14);
-garland(PX,5.0,PZ+19, PX-19,5.0,PZ,'pen',14);
-garland(PX-19,5.0,PZ, PX,5.0,PZ-19,'pen',14);
-garland(PX,5.0,PZ-19, PX+19,5.0,PZ,'pen',14);
+flag(PX+9,PZ,4.2,0xd8362f);
+
+/* ---------- ガーランド・バルーン ---------- */
+const penShape=new THREE.Shape();
+penShape.moveTo(-0.17,0); penShape.lineTo(0.17,0); penShape.lineTo(0,-0.44); penShape.closePath();
+const penGeo=new THREE.ShapeGeometry(penShape);
+const penC=collector(),bulbC=collector();
+const lineMat=new THREE.LineBasicMaterial({color:0x4a4f52});
+let penIdx=0;
+function garland(x1,y1,z1,x2,y2,z2,mode='pen',n=12){
+  const L=Math.hypot(x2-x1,z2-z1);
+  const sag=L*0.085;
+  const pts=[];
+  for(let i=0;i<=20;i++){
+    const u=i/20;
+    pts.push(new THREE.Vector3(x1+(x2-x1)*u,y1+(y2-y1)*u-sag*4*u*(1-u),z1+(z2-z1)*u));
+  }
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lineMat));
+  const a=Math.atan2(-(z2-z1),(x2-x1));
+  for(let i=0;i<n;i++){
+    const u=(i+0.5)/n;
+    const px=x1+(x2-x1)*u,pz=z1+(z2-z1)*u;
+    const py=y1+(y2-y1)*u-sag*4*u*(1-u);
+    if(mode==='pen') penC.add(px,py,pz,a,1,1,1,PEN_COLORS[(penIdx++)%PEN_COLORS.length]);
+    else bulbC.add(px,py-0.07,pz);
+  }
+}
+function pole(x,z,h,c=C.wood){ box(0.12,h,0.12,c,x,h/2,z); circleCol(x,z,0.25); }
+const balloonGroups=[];
+function balloons(x,z){
+  const g=new THREE.Group(); g.position.set(x,0,z);
+  box(0.5,0.5,0.5,0x9aa3a8,0,0.25,0,{parent:g});
+  for(let k=0;k<4;k++){
+    const a=k/4*Math.PI*2;
+    const bx=Math.cos(a)*0.45,bz=Math.sin(a)*0.45,by=3.1+(k%2)*0.5;
+    const b=new THREE.Mesh(new THREE.SphereGeometry(0.36,10,8),
+      lam(PEN_COLORS[(k+Math.abs(Math.floor(x)))%6]));
+    b.position.set(bx,by,bz); b.scale.y=1.15; b.castShadow=true; g.add(b);
+    const pts=[new THREE.Vector3(0,0.5,0),new THREE.Vector3(bx,by-0.36,bz)];
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lineMat));
+  }
+  scene.add(g); balloonGroups.push(g); circleCol(x,z,0.45);
+}
+garland(PX+19,5.0,PZ,PX,5.0,PZ+19,'pen',14);
+garland(PX,5.0,PZ+19,PX-19,5.0,PZ,'pen',14);
+garland(PX-19,5.0,PZ,PX,5.0,PZ-19,'pen',14);
+garland(PX,5.0,PZ-19,PX+19,5.0,PZ,'pen',14);
 balloons(PX-17,PZ+17); balloons(PX+17,PZ-17);
+// 大通りをまたぐ横断バナー
+function crossBanner(z,color){
+  pole(-7.6,z,6.2,C.lamp); pole(7.6,z,6.2,C.lamp);
+  const b=new THREE.Mesh(new THREE.PlaneGeometry(14.4,1.5),
+    new THREE.MeshLambertMaterial({color,side:THREE.DoubleSide}));
+  b.position.set(0,5.2,z); scene.add(b);
+  box(14.6,0.16,0.1,C.orange,0,5.98,z,{shadow:false});
+}
+crossBanner(-24,C.teal); crossBanner(-64,0xd8362f); crossBanner(40,0x2e8ec4);
+
+/* ---------- 井戸・クエスト掲示板・荷車・樽・木箱 ---------- */
+{ // 井戸（交差点南西角）
+  const X=-11,Z=11;
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(1.0,1.1,0.95,12),lam(C.wallStone));
+  base.position.set(X,0.48,Z); base.castShadow=true; scene.add(base);
+  const inner=new THREE.Mesh(new THREE.CylinderGeometry(0.7,0.7,0.1,12),bas(0x18424a));
+  inner.position.set(X,0.97,Z); scene.add(inner);
+  box(0.12,2.1,0.12,C.woodD,X-0.95,1.05,Z); box(0.12,2.1,0.12,C.woodD,X+0.95,1.05,Z);
+  const wr=new THREE.Mesh(roofGeo,lam(0xa84030));
+  wr.scale.set(2.7,0.9,2.0); wr.position.set(X,2.1,Z); wr.castShadow=true; scene.add(wr);
+  box(0.3,0.35,0.3,C.wood,X,1.5,Z,{shadow:false});
+  circleCol(X,Z,1.3);
+}
+{ // クエスト掲示板（プラザ入口）
+  const X=18,Z=10;
+  box(0.16,2.6,0.16,C.woodD,X-1.5,1.3,Z); box(0.16,2.6,0.16,C.woodD,X+1.5,1.3,Z);
+  box(3.4,1.9,0.14,C.wood,X,1.85,Z);
+  const qr=new THREE.Mesh(roofGeo,lam(0x5a6470));
+  qr.scale.set(3.9,0.6,0.7); qr.position.set(X,2.8,Z); qr.castShadow=true; scene.add(qr);
+  for(let k=0;k<6;k++){
+    const p=new THREE.Mesh(new THREE.PlaneGeometry(0.62,0.8),bas(0xfdf8ea));
+    p.position.set(X-1.15+(k%3)*1.15,2.1-Math.floor(k/3)*0.55,Z+0.09);
+    p.rotation.z=(Math.random()-0.5)*0.12; scene.add(p);
+  }
+  boxCol(X-1.8,X+1.8,Z-0.3,Z+0.3);
+}
+function cart(x,z,ry,c1,c2){
+  const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=ry;
+  box(2.0,0.25,3.2,C.woodL,0,0.85,0,{parent:g});
+  box(0.12,0.5,3.2,C.wood,-0.95,1.2,0,{parent:g,shadow:false});
+  box(0.12,0.5,3.2,C.wood,0.95,1.2,0,{parent:g,shadow:false});
+  const wg=new THREE.CylinderGeometry(0.65,0.65,0.14,12); wg.rotateZ(Math.PI/2);
+  [[-1.1,0.5],[1.1,0.5]].forEach(([wx,wz])=>{
+    const w=new THREE.Mesh(wg,lam(C.woodD)); w.position.set(wx,0.65,wz); w.castShadow=true; g.add(w);
+  });
+  box(0.1,0.1,1.6,C.wood,-0.5,0.8,-2.3,{parent:g,shadow:false});
+  box(0.1,0.1,1.6,C.wood,0.5,0.8,-2.3,{parent:g,shadow:false});
+  [[-0.6,0.6],[0.4,-0.4],[0,1.1]].forEach(([hx,hz])=>{
+    const hoop=new THREE.Mesh(new THREE.TorusGeometry(1.0,0.05,6,12,Math.PI),lam(C.wood));
+    hoop.rotation.y=Math.PI/2; hoop.position.set(0,1.05,hz); g.add(hoop);
+  });
+  const cano=new THREE.Mesh(new THREE.CylinderGeometry(1.08,1.08,2.6,10,1,true,0,Math.PI),
+    new THREE.MeshLambertMaterial({map:stripeTexture(c1,c2),side:THREE.DoubleSide}));
+  cano.rotation.z=Math.PI/2; cano.rotation.y=Math.PI/2;
+  cano.position.set(0,1.05,0); cano.castShadow=true; g.add(cano);
+  scene.add(g);
+  const [ex,ez]=Math.abs(Math.sin(ry))>0.5?[2.2,1.3]:[1.3,2.2];
+  boxCol(x-ex,x+ex,z-ez,z+ez);
+}
+cart(20,16,0.4,'#d8362f','#ffffff');
+cart(-18,-10.5,Math.PI/2,'#3aaba8','#ffffff');
+cart(64,9.5,Math.PI/2,'#f0c54a','#ffffff');
+const barrelC=collector(),crateC=collector(),sackC=collector();
+[[22,12],[23.2,13.4],[16,18.5],[-15,9],[-16.4,9.6],[62,12],[-58,10],[-46,18.6],
+ [-10,-15.6],[12,-15.4],[34,9.4],[88,9.2],[-88,9.2],[9.2,-88],[-9.2,66],[9.2,108],
+ [PX+14,PZ+18.6],[PX-20.4,PZ-8],[68,62],[36,64],[-63,-26.8],[-37,-27.4],[14,-44],
+ [-14,-70],[9.4,90],[110,9.4]].forEach((p,i)=>{
+  barrelC.add(p[0],0.42,p[1],i*0.7);
+  if(i%2===0) barrelC.add(p[0]+0.7,0.42,p[1]+0.3,i);
+  circleCol(p[0],p[1],0.55);
+});
+[[24.5,12.6],[-17.5,10.4],[60.5,10.8],[-44,14],[12.5,-16.2],[-12.5,16.2],
+ [70,64],[34,62.4],[-60,-27.2],[9.6,52],[-9.6,-52],[92,9.6],[PX+17,PZ-19]].forEach((p,i)=>{
+  crateC.add(p[0],0.36,p[1],i*0.5);
+  crateC.add(p[0]+0.2,1.0,p[1]-0.15,i*0.9,0.85,0.85,0.85);
+  circleCol(p[0],p[1],0.55);
+});
+[[21,14.5],[-19,8.6],[63,11.4],[36,63],[-48,17.4],[11,-17]].forEach((p,i)=>{
+  sackC.add(p[0],0.3,p[1],i,1,0.75,1);
+});
 
 /* ============================================================
-   トラック類
+   フードトラック（スクーミー名物はそのまま）
    ============================================================ */
 function makeTruck({cargoColor=C.white,cabColor=C.truckRed,sideTex=null,
                     cargoH=2.2,len=4.2,awning=null}={}){
@@ -513,7 +804,7 @@ function placeTruck(g,x,z,heading){
   else boxCol(x-L,x+L,z-W,z+W);
 }
 placeTruck(makeTruck({sideTex:textTexture('FAST COFFEE',{stripe:'#d8362f'})}),24,2.6,'E');
-placeTruck(makeTruck({sideTex:textTexture('HOT-DOG',{bg:'#f7d96a',fg:'#d8362f',stripe:'#d8362f',stripe2:'#f7d96a'}),
+placeTruck(makeTruck({sideTex:textTexture('HOT-DOG',{bg:'#f7d96a',fg:'#d8362f',stripe:'#d8362f'}),
   cabColor:0xd8362f,awning:stripeTexture('#d8362f','#f7d96a')}),-62,13,'W');
 placeTruck(makeTruck({sideTex:textTexture('BBQ',{bg:'#d8362f',fg:'#ffffff'}),
   cabColor:0x9e2620,cargoColor:0xd8362f}),-44,16,'W');
@@ -521,157 +812,10 @@ placeTruck(makeTruck({cargoColor:0xf7d9e3,cabColor:0xf5f5f2,
   awning:stripeTexture('#7fe0c8','#ffffff')}),-46,-20,'N');
 placeTruck(makeTruck({cargoColor:0x8a5a33,cabColor:0x6e4628,len:3.4,
   awning:stripeTexture('#f0e2c8','#8a5a33')}),-16,-34,'N');
-placeTruck(makeTruck({cargoColor:C.orange,cabColor:C.white,len:4.8,cargoH:2.5}),74,88,'N');
-placeTruck(makeTruck({cargoColor:C.white,cabColor:C.white,len:3.2,cargoH:1.9}),36,92,'W');
 balloons(-59,9.6); balloons(-41,12.6);
 
-/* ---- 駐車中のクルマ ---- */
-function car(color,x,z,heading){
-  const g=new THREE.Group();
-  box(1.8,0.55,3.6,color,0,0.55,0,{parent:g});
-  box(1.6,0.5,1.9,color,0,1.06,0.2,{parent:g});
-  box(1.62,0.32,1.6,0x9ad2ea,0,1.1,0.2,{parent:g,shadow:false});
-  const wg=new THREE.CylinderGeometry(0.32,0.32,0.26,12); wg.rotateZ(Math.PI/2);
-  [[-0.85,-1.15],[0.85,-1.15],[-0.85,1.15],[0.85,1.15]].forEach(([wx,wz])=>{
-    const w=new THREE.Mesh(wg,lam(0x23282b)); w.position.set(wx,0.32,wz); g.add(w);
-  });
-  const ry={N:0,S:Math.PI,E:-Math.PI/2,W:Math.PI/2}[heading];
-  g.position.set(x,0,z); g.rotation.y=ry; scene.add(g);
-  const L=2.1,W=1.1;
-  if(heading==='N'||heading==='S') boxCol(x-W,x+W,z-L,z+L);
-  else boxCol(x-L,x+L,z-W,z+W);
-}
-car(CAR_COLORS[0],-34,2.6,'E'); car(CAR_COLORS[1],46,2.6,'E');
-car(CAR_COLORS[2],-52,-2.6,'W'); car(CAR_COLORS[3],70,-2.6,'W');
-car(CAR_COLORS[4],2.6,-46,'N'); car(CAR_COLORS[5],-2.6,64,'S');
-car(CAR_COLORS[6],2.6,96,'N');
-
 /* ============================================================
-   北東＝ビル街（HOTEL・屋上看板・給水塔・アンテナ・バルコニー）
-   ============================================================ */
-const bandC=collector(),winC=collector(),balcC=collector(),railC=collector();
-function tower(cx,cz,w,d,h,color,{rooftop=false,hotel=false,tank=false,antenna=false,
-  bill=null,accent=null,balcony=false}={}){
-  box(w,h,d,color,cx,h/2,cz);
-  box(w+0.4,0.5,d+0.4,new THREE.Color(color).multiplyScalar(0.8).getHex(),cx,h+0.25,cz);
-  const floors=Math.floor((h-3)/2.6);
-  for(let f=0;f<floors;f++){
-    const y=2.6+f*2.6;
-    bandC.add(cx,y,cz+d/2+0.04,0,(w-1.2)/10,1,1);
-    bandC.add(cx,y,cz-d/2-0.04,0,(w-1.2)/10,1,1);
-    bandC.add(cx+w/2+0.04,y,cz,Math.PI/2,(d-1.2)/10,1,1);
-    bandC.add(cx-w/2-0.04,y,cz,Math.PI/2,(d-1.2)/10,1,1);
-    if(balcony){
-      balcC.add(cx-w/4,y-0.7,cz+d/2+0.55); railC.add(cx-w/4,y-0.35,cz+d/2+1.0);
-      balcC.add(cx+w/4,y-0.7,cz+d/2+0.55); railC.add(cx+w/4,y-0.35,cz+d/2+1.0);
-    }
-  }
-  if(accent) box(1.0,h,0.12,accent,cx-w/2+1.4,h/2,cz+d/2+0.07,{shadow:false});
-  box(2.2,1.1,1.6,0x9aa3a8,cx-w/4,h+0.55,cz-d/4);
-  if(tank){
-    const t=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,2.2,12),lam(0xc7cdd1));
-    t.position.set(cx+w/4,h+1.6,cz+d/4); t.castShadow=true; scene.add(t);
-    const tc=new THREE.Mesh(new THREE.ConeGeometry(1.25,0.6,12),lam(0x9aa3a8));
-    tc.position.set(cx+w/4,h+3.0,cz+d/4); scene.add(tc);
-  }
-  if(antenna){
-    box(0.08,4.2,0.08,0x6a7176,cx,h+2.6,cz,{shadow:false});
-    const tip=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,8),bas(0xe04438));
-    tip.position.set(cx,h+4.8,cz); scene.add(tip);
-  }
-  if(bill){
-    const mat=bill==='grad'
-      ? new THREE.MeshBasicMaterial({map:gradTex})
-      : bas(bill);
-    const b=new THREE.Mesh(new THREE.BoxGeometry(Math.min(w-2,7),3,0.25),mat);
-    b.position.set(cx,h+2.2,cz+d/2-0.6); scene.add(b);
-    box(0.15,1.6,0.15,C.lamp,cx-2.4,h+0.8,cz+d/2-0.6,{shadow:false});
-    box(0.15,1.6,0.15,C.lamp,cx+2.4,h+0.8,cz+d/2-0.6,{shadow:false});
-  }
-  if(rooftop){
-    box(w-2,0.12,d-2,C.teal,cx,h+0.56,cz,{shadow:false});
-    for(let k=0;k<4;k++){
-      const a=k/4*Math.PI*2;
-      box(0.14,2.2,0.14,C.wood,cx+Math.cos(a)*(w/2-1.6),h+1.6,cz+Math.sin(a)*(d/2-1.6));
-    }
-    box(w-2.6,0.12,d-2.6,0xf0e2c8,cx,h+2.76,cz,{shadow:false});
-  }
-  if(hotel){
-    const sign=new THREE.Mesh(new THREE.BoxGeometry(3.4,1.1,0.2),
-      new THREE.MeshLambertMaterial({map:textTexture('HOTEL',{bg:'#2d3439',fg:'#f7d96a',font:'bold 110px Meiryo, sans-serif'})}));
-    sign.position.set(cx,h-1.2,cz+d/2+0.15); scene.add(sign);
-  }
-  boxCol(cx-w/2,cx+w/2,cz-d/2,cz+d/2);
-}
-tower(20,-20,12,12,22,TOWER_PALETTE[0],{antenna:true,accent:0x3aaba8});
-tower(38,-18,10,10,16,TOWER_PALETTE[1],{rooftop:true});
-tower(22,-42,14,12,30,TOWER_PALETTE[2],{bill:'grad',tank:true});
-tower(42,-40,12,14,24,TOWER_PALETTE[3],{balcony:true});
-tower(60,-22,12,12,18,0xe9ddc4,{hotel:true,rooftop:true});
-tower(62,-46,12,12,28,TOWER_PALETTE[5],{antenna:true,bill:0x2e8ec4});
-tower(84,-26,14,12,20,TOWER_PALETTE[6],{accent:0xe88a0a});
-tower(86,-52,12,12,26,TOWER_PALETTE[1],{tank:true});
-tower(108,-32,14,14,24,TOWER_PALETTE[0],{bill:0xd8362f});
-tower(26,-68,12,12,20,TOWER_PALETTE[2],{balcony:true});
-tower(50,-70,14,12,26,TOWER_PALETTE[3],{antenna:true});
-tower(76,-76,12,12,18,TOWER_PALETTE[4],{tank:true});
-tower(110,-62,12,12,22,TOWER_PALETTE[5],{bill:0xf0c54a});
-tower(80,18,14,12,14,TOWER_PALETTE[6],{rooftop:true});
-tower(80,40,12,12,18,TOWER_PALETTE[0],{accent:0x3aaba8});
-tower(104,28,14,14,22,TOWER_PALETTE[2],{antenna:true,bill:'grad'});
-bandC.build(new THREE.BoxGeometry(10,1.25,0.07),lam(0x4a6a7e));
-balcC.build(new THREE.BoxGeometry(2.4,0.12,1.0),lam(0xc7cdd1));
-railC.build(new THREE.BoxGeometry(2.4,0.55,0.06),lam(0x8e9496));
-
-/* ---- 低層ショップ ---- */
-let bi=0;
-function shop(cx,cz,w,d,h,face){
-  const color=SHOP_PALETTE[bi%SHOP_PALETTE.length];
-  box(w,h,d,color,cx,h/2,cz);
-  box(w+0.4,0.5,d+0.4,new THREE.Color(color).multiplyScalar(0.78).getHex(),cx,h+0.25,cz);
-  const horiz=(face==='+z'||face==='-z');
-  const faceW=horiz?w:d;
-  const cols=Math.max(1,Math.floor((faceW-1.8)/2.0));
-  const rows=Math.max(1,Math.floor((h-2.6)/2.5));
-  const ry=face==='+x'?Math.PI/2:face==='-x'?-Math.PI/2:face==='-z'?Math.PI:0;
-  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
-    const u=(c-(cols-1)/2)*2.0,y=2.6+r*2.5;
-    let x=cx,z=cz;
-    if(face==='+z'){x=cx+u;z=cz+d/2+0.05;} if(face==='-z'){x=cx+u;z=cz-d/2-0.05;}
-    if(face==='+x'){z=cz+u;x=cx+w/2+0.05;} if(face==='-x'){z=cz+u;x=cx-w/2-0.05;}
-    winC.add(x,y,z,ry);
-  }
-  let dx=cx,dz=cz,ry2=0;
-  if(face==='+z'){dz=cz+d/2+0.04;} if(face==='-z'){dz=cz-d/2-0.04;ry2=Math.PI;}
-  if(face==='+x'){dx=cx+w/2+0.04;ry2=Math.PI/2;} if(face==='-x'){dx=cx-w/2-0.04;ry2=-Math.PI/2;}
-  // 1階ストアフロント（ガラス帯）＋ドア＋サインボード＋オーニング
-  const sf=box(faceW*0.62,1.5,0.1,0x9ad2ea,dx,1.15,dz,{ry:ry2,shadow:false});
-  box(1.3,2.2,0.08,0x4a3a2c,dx,1.1,dz+0.02*Math.cos(ry2),{ry:ry2,shadow:false});
-  box(faceW*0.45,0.7,0.12,AWNING_PALETTE[(bi+1)%AWNING_PALETTE.length],dx,h-0.8,dz,{ry:ry2,shadow:false});
-  const aw=box(Math.min(w,d)*0.6,0.12,1.3,AWNING_PALETTE[bi%AWNING_PALETTE.length],
-    dx+Math.sin(ry2)*0.75,2.55,dz+Math.cos(ry2)*0.75,{ry:ry2});
-  aw.rotation.x=-0.22;
-  boxCol(cx-w/2,cx+w/2,cz-d/2,cz+d/2);
-  bi++;
-}
-shop(96,12,10,9,7.5,'-z');  shop(110,12,10,9,9.9,'-z');
-shop(96,52,10,9,7.5,'-x');  shop(-96,12,11,9,7.5,'-z');
-shop(-110,12,11,9,9.9,'-z');shop(-96,-14,11,9,7.5,'+z');
-shop(24,56,10,9,7.5,'-z');  shop(124,12,10,9,7.5,'-z');
-shop(-124,12,10,9,9.9,'-z');shop(-110,-14,11,9,9.9,'+z');
-winC.build(new THREE.BoxGeometry(1.15,1.35,0.08),lam(C.glass));
-balloons(92,9.4); balloons(20,52.6);
-
-// 自動販売機
-[[-10.2,-26,0xd8362f],[8.4,-36,0x2e8ec4],[54,8.6,0xd8362f],[-90,8.6,0xeef0f2],[8.4,60,0x3aaba8]]
-.forEach(([x,z,c])=>{
-  box(1.0,1.9,0.8,c,x,0.95,z);
-  box(0.7,1.1,0.06,0xeaf6ff,x,1.25,z+0.42,{shadow:false,mat:bas(0xeaf6ff)});
-  boxCol(x-0.6,x+0.6,z-0.5,z+0.5);
-});
-
-/* ============================================================
-   中央北西＝ティールの屋外ワークスペース
+   ティールの屋外ワークスペース（放課後スクーミー）
    ============================================================ */
 {
   const WX=-24,WZ=-20;
@@ -684,8 +828,7 @@ balloons(92,9.4); balloons(20,52.6);
       {bg:'#2d3439',fg:'#ffffff',font:'bold 56px Meiryo, sans-serif'})}));
   sign.position.set(WX-4,4.2,WZ-7.6); scene.add(sign);
   boxCol(WX-9,WX+1,WZ-8,WZ-7.2);
-  const desks=[[-7,-3],[-2,-3],[3,-3],[-7,2],[-2,2],[3,2]];
-  desks.forEach(([dx,dz])=>{
+  [[-7,-3],[-2,-3],[3,-3],[-7,2],[-2,2],[3,2]].forEach(([dx,dz])=>{
     const x=WX+dx,z=WZ+dz;
     box(1.8,0.1,0.9,0xf2f3f4,x,1.0,z);
     box(0.12,0.95,0.12,0x6a7176,x-0.7,0.5,z); box(0.12,0.95,0.12,0x6a7176,x+0.7,0.5,z);
@@ -700,11 +843,11 @@ balloons(92,9.4); balloons(20,52.6);
     circleCol(WX+dx,WZ+dz,0.6);
   });
   pole(WX-11,WZ+8,3.8,C.teal); pole(WX+11,WZ+8,3.8,C.teal);
-  garland(WX-11,3.6,WZ+8, WX+11,3.6,WZ+8,'pen',12);
+  garland(WX-11,3.6,WZ+8,WX+11,3.6,WZ+8,'pen',12);
 }
 
 /* ============================================================
-   北西＝カフェテラス（フェストゥンライト・パラソル・プランター）
+   カフェテラス（宿屋の前庭）
    ============================================================ */
 const tblTop=collector(),tblLeg=collector(),chSeat=collector(),chBack=collector(),chLeg=collector();
 const umbPole=collector(),umbCone=collector();
@@ -726,6 +869,7 @@ for(let r=0;r<4;r++) for(let c=0;c<5;c++){
   cafeTable(x,z,{umb:(r+c)%3===0?((r+c)%2?0xd8362f:0xf0c54a):null});
 }
 cafeTable(-30,-44,{umb:0xd8362f}); cafeTable(-30,-36,{});
+cafeTable(16,34,{}); cafeTable(5,37,{umb:0x3aaba8});
 tblTop.build(new THREE.CylinderGeometry(0.65,0.65,0.06,14),lam(0x9aa3a8),{shadow:true});
 tblLeg.build(new THREE.CylinderGeometry(0.06,0.1,0.74,8),lam(0x6a7176));
 chSeat.build(new THREE.BoxGeometry(0.45,0.08,0.45),lam(0x8c959a),{shadow:true});
@@ -735,8 +879,6 @@ umbPole.build(new THREE.CylinderGeometry(0.04,0.04,2.6,6),lam(0x6a7176));
 const umbMesh=umbCone.build(new THREE.ConeGeometry(1.5,0.7,10),
   new THREE.MeshLambertMaterial({color:0xffffff}),{shadow:true});
 if(umbMesh&&umbMesh.instanceColor) umbMesh.instanceColor.needsUpdate=true;
-
-// フェストゥンライト（カフェを囲む）
 {
   const corners=[[-82,-58],[-40,-58],[-40,-28],[-82,-28]];
   corners.forEach(p=>pole(p[0],p[1],3.4));
@@ -746,7 +888,6 @@ if(umbMesh&&umbMesh.instanceColor) umbMesh.instanceColor.needsUpdate=true;
   }
   garland(-82,3.3,-58,-40,3.3,-28,'pen',16);
 }
-// 青いプランター（チューリップ風）
 [[-46,-26.5],[-72,-26.5]].forEach(([x,z])=>{
   box(2.6,0.6,0.8,0x2e8ec4,x,0.3,z);
   for(let f=0;f<5;f++)
@@ -754,29 +895,8 @@ if(umbMesh&&umbMesh.instanceColor) umbMesh.instanceColor.needsUpdate=true;
   boxCol(x-1.4,x+1.4,z-0.5,z+0.5);
 });
 
-// ステージ棟＋ビルボード
-{
-  const SX=-66,SZ=-72;
-  box(28,15,16,0x3c4146,SX,7.5,SZ);
-  box(28.6,0.8,16.6,0x2d3439,SX,15.4,SZ);
-  const scr=new THREE.Mesh(new THREE.PlaneGeometry(18,9),
-    new THREE.MeshBasicMaterial({map:gradTex}));
-  scr.position.set(SX,8.2,SZ+8.05); scene.add(scr);
-  box(20,1.2,0.3,0xd8362f,SX,2.4,SZ+8.05,{shadow:false});
-  box(2.2,3.4,2.2,0x23282b,SX-12,1.7,SZ+7); box(2.2,3.4,2.2,0x23282b,SX+12,1.7,SZ+7);
-  boxCol(SX-14,SX+14,SZ-8,SZ+8);
-}
-{
-  const BX=-36,BZ=-78;
-  box(0.3,7,0.3,C.lamp,BX-2.5,3.5,BZ); box(0.3,7,0.3,C.lamp,BX+2.5,3.5,BZ);
-  const bb=box(7.5,4.2,0.3,0x1d3a8a,BX,8.2,BZ);
-  bb.rotation.x=-0.12;
-  box(5.5,2.4,0.05,0x3a5cc8,BX,8.2,BZ+0.2,{shadow:false});
-  boxCol(BX-3,BX+3,BZ-0.5,BZ+0.5);
-}
-
 /* ============================================================
-   西＝ピクニック／南＝屋台
+   屋台・ピクニック
    ============================================================ */
 const picTop=collector(),picBench=collector(),picSupp=collector();
 function picnic(x,z,ry=0){
@@ -800,15 +920,14 @@ picnic(-54,22,0.3); picnic(-46,24,-0.2); picnic(-62,24,0);
   cano.rotation.x=-0.45; cano.position.set(KX,2.45,KZ-0.3); cano.castShadow=true; scene.add(cano);
   box(0.1,2.1,0.1,C.lamp,KX-1.3,1.05,KZ-0.6); box(0.1,2.1,0.1,C.lamp,KX+1.3,1.05,KZ-0.6);
   boxCol(KX-1.4,KX+1.4,KZ-0.9,KZ+0.9);
-  cafeTable(16,34,{}); cafeTable(5,37,{umb:0x3aaba8});
   balloons(13.6,27);
 }
 
 /* ============================================================
-   南西＝公園（菜園・池・遊具・花壇・松・岩）
+   公園（菜園・池・遊具・風車）
    ============================================================ */
-patch(4,46,-78,42,noiseTex('#d8cdb4',[['#c9bda0',260,1,3]]),0.025,3);
-patch(30,4,-65,62,noiseTex('#d8cdb4',[['#c9bda0',260,1,3]]),0.025,3);
+patch(4,46,-78,42,dirtTex,0.025,3);
+patch(30,4,-65,62,dirtTex,0.025,3);
 {
   const cropC=collector();
   [[-86,62],[-86,76]].forEach(([gx,gz])=>{
@@ -835,8 +954,6 @@ patch(30,4,-65,62,noiseTex('#d8cdb4',[['#c9bda0',260,1,3]]),0.025,3);
 }
 picnic(-56,48,0.2); picnic(-44,56,-0.3); picnic(-58,76,0.1); picnic(-44,84,0.4);
 picnic(-70,94,0); picnic(-52,100,-0.2);
-
-// 池＋デッキ
 {
   const PDX=-40,PDZ=108;
   const pond=new THREE.Mesh(new THREE.CylinderGeometry(8,8,0.16,28),
@@ -844,10 +961,8 @@ picnic(-70,94,0); picnic(-52,100,-0.2);
   pond.position.set(PDX,0.1,PDZ); scene.add(pond);
   const rim=new THREE.Mesh(new THREE.TorusGeometry(8.1,0.35,8,30),lam(0x9aa3a8));
   rim.rotation.x=Math.PI/2; rim.position.set(PDX,0.18,PDZ); scene.add(rim);
-  for(let k=0;k<3;k++)
-    box(1.1,0.12,3.4,C.woodL,PDX-1.4+k*1.2,0.3,PDZ-7.6);
+  for(let k=0;k<3;k++) box(1.1,0.12,3.4,C.woodL,PDX-1.4+k*1.2,0.3,PDZ-7.6);
   box(0.14,0.9,0.14,C.wood,PDX-1.8,0.45,PDZ-6.2); box(0.14,0.9,0.14,C.wood,PDX+1.0,0.45,PDZ-6.2);
-  // 葦
   const reedC=collector();
   for(let k=0;k<10;k++){
     const a=k/10*Math.PI*2;
@@ -856,18 +971,15 @@ picnic(-70,94,0); picnic(-52,100,-0.2);
   reedC.build(new THREE.ConeGeometry(0.1,1.2,5),lam(0x3fae4f));
   circleCol(PDX,PDZ,8.6);
 }
-// 遊具（すべり台・ブランコ・砂場）
 {
   const GX=-112,GZ=36;
   patch(18,14,GX,GZ,noiseTex('#e8c98a',[['#dcba74',220,1,3]]),0.03,3);
-  // すべり台
   box(0.14,2.0,0.14,0x2e8ec4,GX+5,1.0,GZ-3); box(0.14,2.0,0.14,0x2e8ec4,GX+6,1.0,GZ-3);
   box(1.3,0.12,1.3,0x2e8ec4,GX+5.5,1.95,GZ-3);
   const ramp=box(0.9,0.1,3.4,0xd8362f,GX+5.5,1.1,GZ-1.1);
   ramp.rotation.x=0.52;
   box(0.9,1.0,0.12,0xd8362f,GX+5.5,1.4,GZ-3.7,{shadow:false});
   boxCol(GX+4.4,GX+6.6,GZ-3.8,GZ+0.6);
-  // ブランコ
   box(0.16,2.4,0.16,0xf0c54a,GX-5.5,1.2,GZ-2); box(0.16,2.4,0.16,0xf0c54a,GX-1.5,1.2,GZ-2);
   box(4.4,0.16,0.16,0xf0c54a,GX-3.5,2.4,GZ-2);
   [[-4.4],[-2.6]].forEach(([ox])=>{
@@ -876,13 +988,11 @@ picnic(-70,94,0); picnic(-52,100,-0.2);
     box(0.6,0.08,0.3,0xd8362f,GX+ox,0.72,GZ-2);
   });
   boxCol(GX-5.9,GX-1.1,GZ-2.5,GZ-1.5);
-  // 砂場
   box(5,0.3,4,C.woodL,GX,0.15,GZ+4);
   patch(4.4,3.4,GX,GZ+4,noiseTex('#f0dca8',[['#e4cd90',200,1,3]]),0.33,2);
   boxCol(GX-2.5,GX+2.5,GZ+2,GZ+6);
   balloons(GX+8,GZ+5);
 }
-// 花壇（丸）
 [[-26,36],[-66,34],[-100,92]].forEach(([x,z])=>{
   const bed=new THREE.Mesh(new THREE.CylinderGeometry(2.2,2.4,0.35,16),lam(C.soil));
   bed.position.set(x,0.2,z); bed.castShadow=true; scene.add(bed);
@@ -893,20 +1003,39 @@ picnic(-70,94,0); picnic(-52,100,-0.2);
   }
   circleCol(x,z,2.4);
 });
+/* ---- 風車（DQの村らしく） ---- */
+let windmillBlades;
+{
+  const X=-114,Z=88;
+  const t=new THREE.Mesh(new THREE.CylinderGeometry(2.3,3.1,10,12),lam(0xf2e8d8));
+  t.position.set(X,5,Z); t.castShadow=true; t.receiveShadow=true; scene.add(t);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(2.8,2.8,12),lam(0xa84030));
+  cone.position.set(X,11.4,Z); cone.castShadow=true; scene.add(cone);
+  box(1.2,2.0,0.2,C.woodD,X,1.0,Z+3.0,{shadow:false});
+  windmillBlades=new THREE.Group(); windmillBlades.position.set(X,9.4,Z+3.05);
+  for(let k=0;k<4;k++){
+    const b=new THREE.Mesh(new THREE.BoxGeometry(0.8,4.6,0.1),
+      new THREE.MeshLambertMaterial({color:0xf5f5f2,side:THREE.DoubleSide}));
+    b.position.y=2.5;
+    const piv=new THREE.Group(); piv.rotation.z=k/4*Math.PI*2;
+    piv.add(b); windmillBlades.add(piv);
+  }
+  scene.add(windmillBlades);
+  circleCol(X,Z,3.3);
+}
 
 /* ============================================================
-   南東＝イベントステージ（演出強化）＋マーケットテント
+   イベントステージ（お祭り会場）
    ============================================================ */
 const spotCones=[];
-let eventScreen;
 {
   const EX=52,EZ=86;
   box(24,1.0,13,0x2d3439,EX,0.5,EZ);
   box(23,0.12,12,C.yellow,EX,1.06,EZ,{shadow:false});
   box(18,9.5,0.8,0x23282b,EX,5.75,EZ+5.8);
-  eventScreen=new THREE.Mesh(new THREE.PlaneGeometry(15.5,7.6),
+  const scr=new THREE.Mesh(new THREE.PlaneGeometry(15.5,7.6),
     new THREE.MeshBasicMaterial({map:gradTex}));
-  eventScreen.rotation.y=Math.PI; eventScreen.position.set(EX,5.9,EZ+5.35); scene.add(eventScreen);
+  scr.rotation.y=Math.PI; scr.position.set(EX,5.9,EZ+5.35); scene.add(scr);
   [[EX-14,EZ+3],[EX+14,EZ+3]].forEach(([sx,sz])=>{
     box(1.5,2.0,1.5,0x23282b,sx,1.0,sz);
     box(1.3,1.8,1.3,0x2d3439,sx,2.9,sz);
@@ -930,7 +1059,6 @@ let eventScreen;
   boxCol(EX-12,EX+12,EZ-6.5,EZ+6.5);
   circleCol(EX-11.5,EZ-6,0.35); circleCol(EX+11.5,EZ-6,0.35);
   balloons(EX-15,EZ-8); balloons(EX+15,EZ-8);
-  // マーケットテント
   const tentCols=[['#d8362f','#ffffff'],['#3aaba8','#ffffff'],['#f0c54a','#ffffff'],['#2e8ec4','#ffffff']];
   for(let k=0;k<4;k++){
     const tx=38+k*9.4,tz=60;
@@ -948,8 +1076,6 @@ let eventScreen;
   garland(34,3.8,54,34,3.8,66,'bulb',10);
   garland(68,3.8,54,68,3.8,66,'bulb',10);
 }
-
-/* ---- 紙吹雪（イベント広場） ---- */
 const CONF_N=90;
 const confGeo=new THREE.BufferGeometry();
 {
@@ -964,7 +1090,6 @@ const confGeo=new THREE.BufferGeometry();
   scene.add(new THREE.Points(confGeo,
     new THREE.PointsMaterial({size:0.17,vertexColors:true,transparent:true,opacity:0.95})));
 }
-/* ---- 煙（BBQ）と湯気（コーヒー） ---- */
 function smoke(x,y,z,n,spread){
   const g=new THREE.BufferGeometry();
   const pos=new Float32Array(n*3);
@@ -974,15 +1099,14 @@ function smoke(x,y,z,n,spread){
     pos[i*3+2]=z+(Math.random()-0.5)*spread;
   }
   g.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  const m=new THREE.Points(g,new THREE.PointsMaterial({
-    color:0xeceff0,size:0.5,transparent:true,opacity:0.5,depthWrite:false}));
-  scene.add(m);
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({
+    color:0xeceff0,size:0.5,transparent:true,opacity:0.5,depthWrite:false})));
   return {g,x,y,z,n,spread};
 }
-const smokes=[smoke(-44,3.2,16,26,1.0), smoke(-16,3.4,-34,18,0.7)];
+const smokes=[smoke(-44,3.2,16,26,1.0),smoke(-16,3.4,-34,18,0.7)];
 
 /* ============================================================
-   緑：木・松・ヤシ・低木・岩・ベンチ
+   緑（木・松・ヤシ・低木・岩）
    ============================================================ */
 const trTrunk=collector(),trCano=collector();
 function tree(x,z,s=1){
@@ -995,39 +1119,29 @@ function tree(x,z,s=1){
  [-88,98],[-100,84],[-104,64],[-100,46],[-92,32],[-72,28],[-110,100],[-64,64],[-50,68],
  [-18,40],[-16,64],[-20,94],[-66,40],[-76,46],[-96,56],[-58,120],[-84,116],[-118,116],
  [-124,76],[-126,52],[-122,24]].forEach(p=>tree(p[0],p[1],0.9+Math.random()*0.5));
-[[-94,-30],[-104,-44],[-98,-62],[-88,-84],[-70,-92],[-50,-90],[-34,-92],[-26,-60],
- [-92,-16],[-110,-70],[-118,-36],[-30,-104],[-58,-100]].forEach(p=>tree(p[0],p[1],0.9+Math.random()*0.5));
-[[120,8],[124,46],[16,68],[30,66],[96,66],[118,76],[64,58],[124,60],[90,78]]
-.forEach(p=>tree(p[0],p[1],1));
+[[-92,-16],[-26,-60],[-94,-30]].forEach(p=>tree(p[0],p[1],1));
+[[16,68],[30,66],[96,58],[64,58],[74,56]].forEach(p=>tree(p[0],p[1],1));
 trTrunk.build(new THREE.CylinderGeometry(0.16,0.26,2.2,7),lam(C.treeTrunk),{shadow:true});
 trCano.build(new THREE.IcosahedronGeometry(1.7,1),
   new THREE.MeshLambertMaterial({color:0xffffff}),{shadow:true});
-
-// 松
 const pineT=collector(),pineC=collector();
-[[-128,96],[-130,64],[-118,128],[-96,124],[-66,126],[-128,36],[-14,118],[-16,86],
- [-114,-84],[-122,-58],[-40,-110],[-74,-108]].forEach(([x,z])=>{
+[[-128,96],[-130,64],[-118,128],[-96,124],[-66,126],[-128,36],[-14,118],[-16,86]]
+.forEach(([x,z])=>{
   pineT.add(x,0.6,z);
-  pineC.add(x,1.9,z,0,1,1,1); pineC.add(x,2.8,z,0,0.78,0.85,0.78); pineC.add(x,3.6,z,0,0.55,0.7,0.55);
+  pineC.add(x,1.9,z); pineC.add(x,2.8,z,0,0.78,0.85,0.78); pineC.add(x,3.6,z,0,0.55,0.7,0.55);
   circleCol(x,z,0.5);
 });
 pineT.build(new THREE.CylinderGeometry(0.12,0.2,1.2,6),lam(C.treeTrunk),{shadow:true});
 pineC.build(new THREE.ConeGeometry(1.35,1.9,8),lam(0x2a7d3f),{shadow:true});
-
-// 岩
 const rockC=collector();
 [[-48,116],[-34,98],[-50,104],[-92,108],[-108,76],[-70,52],[-26,62],[-120,44],
  [-30,118],[-46,30]].forEach(([x,z])=>{
   rockC.add(x,0.3,z,Math.random()*3,0.8+Math.random()*0.7,0.5+Math.random()*0.3,0.8+Math.random()*0.7);
 });
 rockC.build(new THREE.DodecahedronGeometry(0.65,0),lam(0x9aa3a8),{shadow:true});
-
-// ヤシ
 const palmPos=[
   [PX+16.2,PZ+16.2],[PX-16.2,PZ+16.2],[PX+16.2,PZ-16.2],[PX-16.2,PZ-16.2],
-  [-10,-9],[10,-9.5],[-10,10],[12,-30],[12,-52],[12,-76],[-12,-46],[-12,-66],
-  [66,9],[92,9],[-34,9],[-78,9],[14,52],[14,76],[68,52],[-12,30],[-12,52],
-  [108,9],[-118,9],[12,-100],[-12,-92],[14,104],[74,56]
+  [-10,-9],[10,-9.5],[-10,10],[14,52],[14,76],[68,52],[-12,30],[-12,52],[74,56]
 ];
 const pTr=collector(),pFr=collector();
 const frondGeo=new THREE.ConeGeometry(0.55,3.4,4);
@@ -1039,24 +1153,10 @@ palmPos.forEach((p,i)=>{
 });
 pTr.build(new THREE.CylinderGeometry(0.16,0.30,7.5,7),lam(C.palmTrunk),{shadow:true});
 pFr.build(frondGeo,lam(C.palmLeaf),{shadow:true});
-
-// 低木
 const bushC=collector();
-for(let x=-130;x<140;x+=17){ if(Math.abs(x)>12){ bushC.add(x+3,0.5,-8.6,Math.random()*3,1,0.8,1); bushC.add(x-2,0.5,8.6,Math.random()*3,1,0.8,1);} }
-for(let z=-130;z<140;z+=17){ if(Math.abs(z)>12){ bushC.add(-8.6,0.5,z+4,Math.random()*3,1,0.8,1); bushC.add(8.6,0.5,z-3,Math.random()*3,1,0.8,1);} }
+for(let x=-126;x<132;x+=15){ if(Math.abs(x)>12){ bushC.add(x+3,0.5,-8.7,Math.random()*3,1,0.8,1); bushC.add(x-2,0.5,8.7,Math.random()*3,1,0.8,1);} }
+for(let z=-126;z<132;z+=15){ if(Math.abs(z)>12){ bushC.add(-8.7,0.5,z+4,Math.random()*3,1,0.8,1); bushC.add(8.7,0.5,z-3,Math.random()*3,1,0.8,1);} }
 bushC.build(new THREE.IcosahedronGeometry(0.55,1),lam(C.shrub),{shadow:true});
-
-// 歩道沿いの花
-for(let x=-120;x<140;x+=22){
-  if(Math.abs(x)>14){
-    for(let f=0;f<4;f++)
-      flowerC.add(x+f*0.5,0.2,-8.9,0,1,1,1,FLOWER_COLORS[(f+x&7)%FLOWER_COLORS.length]);
-  }
-}
-flowerC.build(new THREE.SphereGeometry(0.14,6,5),
-  new THREE.MeshLambertMaterial({color:0xffffff}),{shadow:false});
-
-// ベンチ
 const benchC=collector();
 [[PX-10,PZ+19.4,0],[PX+10,PZ+19.4,0],[PX+19.4,PZ-10,Math.PI/2],[PX+19.4,PZ+10,Math.PI/2],
  [-10,18,0],[14,18,0],[-30,-9.2,0],[30,-9.2,0],[9.2,-26,Math.PI/2],[9.2,40,Math.PI/2],
@@ -1075,7 +1175,7 @@ let balloonShip;
   const env=new THREE.Mesh(new THREE.SphereGeometry(5,16,14),
     new THREE.MeshLambertMaterial({map:stripeTexture('#d8362f','#f0c54a')}));
   env.scale.y=1.2; env.castShadow=true; g.add(env);
-  const bk=box(1.6,1.2,1.6,C.wood,0,-7.4,0,{parent:g});
+  box(1.6,1.2,1.6,C.wood,0,-7.4,0,{parent:g});
   for(let k=0;k<4;k++){
     const a=k/4*Math.PI*2;
     const pts=[new THREE.Vector3(Math.cos(a)*3.2,-4.6,Math.sin(a)*3.2),
@@ -1098,7 +1198,26 @@ for(let i=0;i<8;i++){
   scene.add(g); clouds.push(g);
 }
 
-// ガーランド／バルブのビルド（全配置完了後）
+/* ============================================================
+   一括ビルド（共有InstancedMesh）
+   ============================================================ */
+hFound.build(new THREE.BoxGeometry(1,1,1),lam(0x9d998e));
+hBody.build(new THREE.BoxGeometry(1,1,1),
+  new THREE.MeshLambertMaterial({color:0xffffff}),{shadow:true});
+hRoof.build(roofGeo,new THREE.MeshLambertMaterial({color:0xffffff}),{shadow:true});
+hChim.build(new THREE.BoxGeometry(0.55,1,0.55),lam(0xa85a4a),{shadow:true});
+hWin.build(new THREE.BoxGeometry(0.82,1.0,0.08),lam(0x35506a));
+hBeamV.build(new THREE.BoxGeometry(0.16,1,0.08),lam(C.woodD));
+hBeamH.build(new THREE.BoxGeometry(1,0.16,0.08),lam(C.woodD));
+hDoor.build(new THREE.BoxGeometry(1.05,1.95,0.1),lam(C.woodD),{shadow:true});
+hStep.build(new THREE.BoxGeometry(1.4,0.24,0.6),lam(0x9d998e));
+fboxC.build(new THREE.BoxGeometry(0.95,0.24,0.26),lam(C.wood));
+merlonC.build(new THREE.BoxGeometry(1.2,1.0,2.9),lam(C.wallStoneD),{shadow:true});
+barrelC.build(new THREE.CylinderGeometry(0.4,0.36,0.85,10),lam(C.wood),{shadow:true});
+crateC.build(new THREE.BoxGeometry(0.75,0.72,0.75),lam(C.woodL),{shadow:true});
+sackC.build(new THREE.SphereGeometry(0.42,8,7),lam(0xd6bd8e),{shadow:true});
+flowerC.build(new THREE.SphereGeometry(0.14,6,5),
+  new THREE.MeshLambertMaterial({color:0xffffff}));
 penC.build(penGeo,new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));
 bulbC.build(new THREE.SphereGeometry(0.09,6,5),bas(0xfff0c0));
 
@@ -1112,7 +1231,6 @@ const EYE=1.7,R=0.5;
 const keys={};
 let started=false,mouseDrag=false,lastMX=0,lastMY=0;
 let joy=null,look=null;
-
 function lookDelta(dx,dy,k){
   player.yaw-=dx*k; player.pitch-=dy*k;
   player.pitch=Math.max(-1.45,Math.min(1.45,player.pitch));
@@ -1136,7 +1254,6 @@ renderer.domElement.addEventListener('mousedown',e=>{
 addEventListener('mouseup',()=>{ mouseDrag=false; });
 addEventListener('keydown',e=>{ keys[e.code]=true; });
 addEventListener('keyup',e=>{ keys[e.code]=false; });
-
 renderer.domElement.addEventListener('touchstart',e=>{
   if(!started) return;
   for(const t of e.changedTouches){
@@ -1202,8 +1319,8 @@ function collide(){
       }
     }
   }
-  player.x=Math.max(-138,Math.min(138,player.x));
-  player.z=Math.max(-138,Math.min(138,player.z));
+  player.x=Math.max(-131,Math.min(131,player.x));
+  player.z=Math.max(-196,Math.min(131,player.z));
 }
 
 /* ============================================================
@@ -1212,29 +1329,28 @@ function collide(){
 const mm=document.getElementById('minimap').getContext('2d');
 const hex=c=>'#'+c.toString(16).padStart(6,'0');
 function drawMinimap(){
-  const S=152,s=S/290,cx=S/2,cz=S/2;
+  const S=152,s=S/300,cx=S/2,cz=S/2+8;
   mm.clearRect(0,0,S,S);
-  mm.fillStyle=hex(C.pave); mm.fillRect(0,0,S,S);
+  mm.fillStyle='#cfc6b4'; mm.fillRect(0,0,S,S);
   mm.fillStyle=hex(C.grass);
-  mm.fillRect(cx-138*s,cz+12*s,126*s,126*s);
-  mm.fillRect(cx-132*s,cz-128*s,118*s,112*s);
-  mm.fillStyle=hex(C.asphalt);
-  mm.fillRect(0,cz-5*s,S,10*s); mm.fillRect(cx-5*s,0,10*s,S);
-  mm.fillStyle='#9ba4aa';
-  mm.fillRect(cx+12*s,cz-84*s,108*s,72*s);
+  mm.fillRect(cx-134*s,cz+12*s,122*s,122*s);
+  mm.fillRect(cx-130*s,cz-126*s,116*s,108*s);
+  mm.fillStyle='#84898e';
+  mm.fillRect(0,cz-5.5*s,S,11*s); mm.fillRect(cx-5.5*s,0,11*s,S);
   mm.fillStyle=hex(C.teal); mm.fillRect(cx-35*s,cz-28*s,22*s,16*s);
-  mm.fillStyle=hex(C.plaza); mm.fillRect(cx+(PX-18)*s,cz+(PZ-18)*s,36*s,36*s);
-  mm.fillStyle=hex(C.diamond);
-  mm.save(); mm.translate(cx+PX*s,cz+PZ*s); mm.rotate(Math.PI/4);
-  mm.fillRect(-12.6*s,-12.6*s,25.2*s,25.2*s); mm.restore();
+  mm.fillStyle=hex(C.plaza); mm.fillRect(cx+(40-18)*s,cz+(28-18)*s,36*s,36*s);
   mm.fillStyle=hex(C.water);
-  mm.beginPath(); mm.arc(cx+PX*s,cz+PZ*s,3*s,0,Math.PI*2); mm.fill();
+  mm.beginPath(); mm.arc(cx+40*s,cz+28*s,3*s,0,Math.PI*2); mm.fill();
   mm.fillStyle=hex(C.yellow); mm.fillRect(cx+40*s,cz+80*s,24*s,13*s);
   mm.fillStyle=hex(C.soil); mm.fillRect(cx-93*s,cz+57*s,15*s,24*s);
   mm.fillStyle=hex(C.pond);
   mm.beginPath(); mm.arc(cx-40*s,cz+108*s,8*s,0,Math.PI*2); mm.fill();
-  mm.fillStyle=hex(C.truckRed);
-  [[24,2.6],[-62,13],[-44,16]].forEach(p=>mm.fillRect(cx+p[0]*s-2,cz+p[1]*s-1.4,4,2.8));
+  // 城壁と城
+  mm.strokeStyle='#6e6a60'; mm.lineWidth=3;
+  mm.strokeRect(cx-134*s,cz-134*s,268*s,268*s);
+  mm.fillStyle='#d86a8a';
+  mm.beginPath(); mm.moveTo(cx,cz-150*s); mm.lineTo(cx+8,cz-134*s); mm.lineTo(cx-8,cz-134*s);
+  mm.closePath(); mm.fill();
   const px=cx+player.x*s,pz=cz+player.z*s;
   const fx=-Math.sin(player.yaw),fz=-Math.cos(player.yaw);
   mm.save(); mm.translate(px,pz); mm.rotate(Math.atan2(fx,-fz));
@@ -1252,7 +1368,6 @@ function animate(){
   requestAnimationFrame(animate);
   const dt=Math.min(clock.getDelta(),0.05);
   const t=clock.elapsedTime;
-
   if(started){
     if(keys.ArrowLeft) player.yaw+=1.8*dt;
     if(keys.ArrowRight) player.yaw-=1.8*dt;
@@ -1276,7 +1391,6 @@ function animate(){
   camera.position.set(player.x,EYE,player.z);
   camera.rotation.set(player.pitch,player.yaw,0);
 
-  // 噴水
   const pos=pGeo.attributes.position.array;
   let pi=0;
   for(let k=0;k<jetCurves.length;k++){
@@ -1288,14 +1402,9 @@ function animate(){
   }
   pGeo.attributes.position.needsUpdate=true;
   waterSurf.position.y=0.91+Math.sin(t*2.2)*0.012;
-
-  // スクリーンの流れる色
   gradTex.offset.x=t*0.05;
-
-  // スポットライト回転
   spotCones.forEach((p,i)=>{ p.rotation.y=Math.sin(t*0.7+i*1.3)*0.7+t*0.3; });
-
-  // 紙吹雪
+  if(windmillBlades) windmillBlades.rotation.z=t*0.55;
   {
     const cp=confGeo.attributes.position.array;
     for(let i=0;i<CONF_N;i++){
@@ -1308,7 +1417,6 @@ function animate(){
     }
     confGeo.attributes.position.needsUpdate=true;
   }
-  // 煙・湯気
   smokes.forEach(s=>{
     const sp2=s.g.attributes.position.array;
     for(let i=0;i<s.n;i++){
@@ -1322,9 +1430,9 @@ function animate(){
     }
     s.g.attributes.position.needsUpdate=true;
   });
-  // バルーン・旗・気球
   balloonGroups.forEach((g,i)=>{ g.position.y=Math.sin(t*1.4+i)*0.12; });
   flags.forEach((f,i)=>{ f.rotation.y=Math.sin(t*2.4+i)*0.22; });
+  signMeshes.forEach((sm,i)=>{ sm.rotation.z=Math.sin(t*1.6+i*0.9)*0.08; });
   if(balloonShip){
     balloonShip.position.x=-60+Math.cos(t*0.045)*36;
     balloonShip.position.z=55+Math.sin(t*0.045)*30;
@@ -1332,7 +1440,6 @@ function animate(){
     balloonShip.rotation.y=t*0.045+Math.PI/2;
   }
   for(const c of clouds){ c.position.x+=dt*1.2; if(c.position.x>260)c.position.x=-260; }
-
   if(++mmTick%3===0) drawMinimap();
   renderer.render(scene,camera);
 }
